@@ -63,11 +63,18 @@ class User
     #[ORM\OneToMany(mappedBy:'user', targetEntity: Application::class)]
     private Collection $applications;
 
+    //-------------------Relación usuarios y cursos---------------------------------------------------------------------------------
+    //Relación muchos a muchos: un usuario puede inscribirse en muchos cursos y un curso puede tener muchos alumnos
+    #[ORM\ManyToMany(targetEntity: Course::class, inversedBy:'students')]
+    private Collection $courses;
+
+
 
 
     public function __construct()
     {
         $this->applications = new ArrayCollection(); //incializar la colección de aplicaciones cuando se cree un nuevo usuario
+        $this->courses = new ArrayCollection();
     }
 
 
@@ -243,11 +250,33 @@ class User
         return $this;
     }
 
+    //----------------------Relación con aplicar-----------------------------
     //Obtener las aplicaciones a ofertas de empleo del usuario:
     public function getApplications(): Collection
     {
         return $this->applications;
     }
+
+
+    //-------------------------Relación cursos---------------------------
+    public function addCourse(Course $course): self
+    {
+        if(!$this->courses->contains($course)){
+            $this->courses[] = $course;
+            $course->addStudents($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCourse(Course $course): self
+    {
+        $this->courses->removeElement($course);
+        return $this;
+    }
+
+
+
 
 
 
