@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Repository\CourseRepository;
 use Doctrine\DBAL\Types\Types;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: CourseRepository::class)]
@@ -19,6 +21,19 @@ class Course
 
     #[ORM\Column(type: Types::TEXT)]
     private ?string $content = null;
+
+    //---------------Relación con usuarios---------------------
+    //Relación muchos a muchos: un usuario puede inscribirse en muchos cursos y un curso puede tener muchos alumnos
+    #[ORM\ManyToMany(targetEntity: User::class, mappedBy:'courses')]
+    private Collection $students; 
+
+
+
+    public function __construct()
+    {
+        $this->students = new ArrayCollection();
+    }
+
 
     public function getId(): ?int
     {
@@ -48,4 +63,26 @@ class Course
 
         return $this;
     }
+
+
+    //Relación con usuarios. 
+    public function addStudents(User $students): self
+    {
+        if(!$this->students->contains($students)){
+            $this->students[] = $students;
+        }
+
+        return $this;
+    }
+
+    public function removeStudent(User $student): self
+    {
+        $this->students->removeElement($student);
+        return $this;
+    }
+
+
+
+
+
 }
