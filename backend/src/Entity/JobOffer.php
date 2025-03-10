@@ -3,7 +3,10 @@
 namespace App\Entity;
 
 use App\Repository\JobOfferRepository;
+use Collator;
 use Doctrine\DBAL\Types\Types;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: JobOfferRepository::class)]
@@ -28,6 +31,20 @@ class JobOffer
 
     #[ORM\Column(nullable: true)]
     private ?string $salary = null;
+
+    //----------------------------Relación ofertas de trabajo y usuario, a través de aplicación------------------------------------
+    //Relación uno a muchos con aplicar: Una oferta de trabajo puede tener muchas aplicaciones de usuario
+    #[ORM\OneToMany(mappedBy:'jobOffer', targetEntity: Application::class)]
+    private Collection $applications;
+
+
+    public function __construct()
+    {
+        $this->applications = new ArrayCollection(); //inicializar la colección de aplicaciones cuando se cree una nueva oferta
+    }
+
+
+
 
     public function getId(): ?int
     {
@@ -93,4 +110,14 @@ class JobOffer
 
         return $this;
     }
+
+
+    //obetner todas las aplicaicones asociadas a una oferta
+    public function getapplications(): Collection
+    {
+        return $this->applications;
+    }
+
+
+
 }

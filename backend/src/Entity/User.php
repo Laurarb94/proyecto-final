@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -49,12 +50,26 @@ class User
     private ?string $biography = null;
 
     //-------------------Relación usuarios y mensajes-----------------------------------
+    // Relación uno a muchos: un usuario puede enviar muchos mensajes, y un mensaje sólo puede tener un remitente y un destinataorio
 
     #[ORM\OneToMany(mappedBy:'sender', targetEntity: Message::class, orphanRemoval:true)] //orphanRemoval para que cuando borres un mensaje de la colección se borre de la bbdd también
     private Collection $sentMessages;
 
     #[ORM\OneToMany(mappedBy: 'receiver', targetEntity: Message::class, orphanRemoval: true)]
     private Collection $receivedMessages;
+
+    //------------------Relación usuarios y ofertas de trabajo, a través de aplication-----------------------------------------------
+    //Relación uno a muchos con Aplicar: un usuario puede aplicar a muchas ofertas de trabajo
+    #[ORM\OneToMany(mappedBy:'user', targetEntity: Application::class)]
+    private Collection $applications;
+
+
+
+    public function __construct()
+    {
+        $this->applications = new ArrayCollection(); //incializar la colección de aplicaciones cuando se cree un nuevo usuario
+    }
+
 
     public function getId(): ?int
     {
@@ -226,6 +241,12 @@ class User
     {
         $this->receivedMessages->removeElement($message);
         return $this;
+    }
+
+    //Obtener las aplicaciones a ofertas de empleo del usuario:
+    public function getApplications(): Collection
+    {
+        return $this->applications;
     }
 
 
