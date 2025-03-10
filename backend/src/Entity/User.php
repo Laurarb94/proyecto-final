@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -46,6 +47,14 @@ class User
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $biography = null;
+
+    //-------------------Relación usuarios y mensajes-----------------------------------
+
+    #[ORM\OneToMany(mappedBy:'sender', targetEntity: Message::class, orphanRemoval:true)] //orphanRemoval para que cuando borres un mensaje de la colección se borre de la bbdd también
+    private Collection $sentMessages;
+
+    #[ORM\OneToMany(mappedBy: 'receiver', targetEntity: Message::class, orphanRemoval: true)]
+    private Collection $receivedMessages;
 
     public function getId(): ?int
     {
@@ -183,4 +192,42 @@ class User
 
         return $this;
     }
+
+    //----Relación usuarios y mensajes-------------
+
+    //Gestión de mensajes enviados
+    public function addSentMessage(Message $message): self
+    {
+        if(!$this->sentMessages->contains($message)){
+            $this->sentMessages[] = $message;
+            $message->setSender($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSentMessage(Message $message): self
+    {
+        $this->sentMessages->removeElement($message);
+        return $this;
+    }
+
+    //Gestión mensajes recibidos
+    public function addReceivedMessage(Message $message): self
+    {
+        if (!$this->receivedMessages->contains($message)) {
+            $this->receivedMessages[] = $message;
+            $message->setReceiver($this);
+        }
+        return $this;
+    }
+    
+    public function removeReceivedMessage(Message $message): self
+    {
+        $this->receivedMessages->removeElement($message);
+        return $this;
+    }
+
+
+
 }

@@ -20,6 +20,15 @@ class Message
     #[ORM\Column]
     private ?\DateTimeImmutable $sentAt = null;
 
+    //Relación con user
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy:'sentMessages')]
+    #[ORM\JoinColumn(nullable:false)]
+    private ?User $sender = null;
+
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy:'recivedMessages')]
+    #[ORM\JoinColumn(nullable:false)]
+    private ?User $receiver = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -48,4 +57,27 @@ class Message
 
         return $this;
     }
+
+    public function getSender(): ?User
+    {
+        return $this->sender;
+    }
+
+    public function setSender(?User $sender): self
+    {
+        $this->sender = $sender; 
+        return $this;
+    }
+
+    public function getReceiver(): ?User
+    {
+        return $this->receiver;
+    }
+    
+    public function setReceiver(?User $receiver): self
+    {
+        $this->receiver = $receiver;
+        return $this;
+    }
+
 }
