@@ -27,6 +27,17 @@ class Course
     #[ORM\ManyToMany(targetEntity: User::class, mappedBy:'courses')]
     private Collection $students; 
 
+    
+    //--------------Relación con cateorías---------------------------
+    #[ORM\ManyToOne(targetEntity: Category::class)]
+    #[ORM\JoinColumn(nullable:false)]
+    private ?Category $category = null;
+
+    //----------------Relación con subcategorías----------------------------
+    #[ORM\ManyToOne(targetEntity: Subcategory::class)]
+    #[ORM\JoinColumn(nullable:false)]
+    private ?Subcategory $subcategory = null;
+
 
 
     public function __construct()
@@ -78,6 +89,30 @@ class Course
     public function removeStudent(User $student): self
     {
         $this->students->removeElement($student);
+        return $this;
+    }
+
+    //Relación categoría
+    public function getCategory(): ?Category
+    {
+        return $this->category;
+    }
+
+    public function setCategory(?Category $category): self
+    {
+        $this->category = $category;
+        return $this;
+    }
+
+    //Relación subcategoría
+    public function getSubcategory(): ?Subcategory
+    {
+        return $this->subcategory;
+    }
+
+    public function setSubcategory(?Subcategory $subcategory): self
+    {
+        $this->subcategory = $subcategory;
         return $this;
     }
 
