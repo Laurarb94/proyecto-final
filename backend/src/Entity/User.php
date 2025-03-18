@@ -7,9 +7,11 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-class User
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -31,7 +33,7 @@ class User
     #[ORM\Column(length: 255)]
     private ?string $password = null;
 
-    #[ORM\Column(type: Types::ARRAY)]
+    #[ORM\Column(type: "json")]
     private array $roles = [];
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -48,6 +50,7 @@ class User
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $biography = null;
+
 
     //-------------------Relación usuarios y mensajes-----------------------------------
     // Relación uno a muchos: un usuario puede enviar muchos mensajes, y un mensaje sólo puede tener un remitente y un destinataorio
@@ -73,6 +76,7 @@ class User
 
     public function __construct()
     {
+        $this->roles = [];
         $this->applications = new ArrayCollection(); //incializar la colección de aplicaciones cuando se cree un nuevo usuario
         $this->courses = new ArrayCollection();
     }
@@ -145,7 +149,9 @@ class User
 
     public function getRoles(): array
     {
-        return $this->roles;
+        $roles = $this->roles;
+        $roles[] = 'ROLE_USER'; //garantizar que siempre tenga al menos el rol de usuario
+        return array_unique($roles);
     }
 
     public function setRoles(array $roles): static
@@ -213,6 +219,17 @@ class User
         $this->biography = $biography;
 
         return $this;
+    }
+
+    //------------------Seguridad
+    public function eraseCredentials(): void
+    {
+        
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return $this->email; //el email va a ser el identidicador único del usuario
     }
 
     //----Relación usuarios y mensajes-------------
