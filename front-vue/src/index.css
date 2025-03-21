@@ -1,0 +1,4 @@
+@import "tailwindcss/preflight"; /* Importa el preflight de Tailwind */
+
+@tailwind utilities; /* Deja solo las utilidades */
+
