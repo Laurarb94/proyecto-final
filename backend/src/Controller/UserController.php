@@ -33,6 +33,32 @@ final class UserController extends AbstractController{
         return $this->json($users, Response::HTTP_OK);
     }
     
+    //----------------------------------------Obtener usuario por su id---------------------------------------------------------------------------
+    #[Route('api/user/{id}', name: 'user_get', methods:['GET'])]
+    public function getUserById(int $id): JsonResponse
+    {
+        $user = $this->em->getRepository(User::class)->find($id);
+
+        if(!$user){
+            return new JsonResponse(['error' => 'Usuario no encontrado'], Response::HTTP_NOT_FOUND);
+        }
+
+        return $this->json([
+            'id'=> $user->getId(),
+            'name'=>$user->getName(),
+            'last_name1' => $user->getLastName1(),
+            'last_name2'=>$user->getLastName2(),
+            'email'=>$user->getEmail(),
+            'password'=>$user->getPassword(),
+            'country'=>$user->getCountry(),
+            'city'=>$user->getCity(),
+            'phone'=>$user->getPhone(),
+            'photo'=>$user->getPhoto(),
+            'biography'=>$user->getBiography(),
+            'roles'=>$user->getRoles(),
+        ], Response::HTTP_OK);
+    }
+
     //------------------------------------------Crear usuarios----------------------------------------------------------------------------------
     #[Route('api/user', name:'user_create', methods: ['POST'])]
     public function create(Request $request, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $em, 
@@ -83,7 +109,7 @@ final class UserController extends AbstractController{
         return $this->json([
             'id'=> $user->getId(),
             'name'=>$user->getName(),
-            'las_name1' => $user->getLastName1(),
+            'last_name1' => $user->getLastName1(),
             'last_name2'=>$user->getLastName2(),
             'email'=>$user->getEmail(),
             'password'=>$user->getPassword(),
@@ -163,7 +189,7 @@ final class UserController extends AbstractController{
         return $this->json([
             'id'=> $user->getId(),
             'name'=>$user->getName(),
-            'las_name1' => $user->getLastName1(),
+            'last_name1' => $user->getLastName1(),
             'last_name2'=>$user->getLastName2(),
             'email'=>$user->getEmail(),
             'password'=>$user->getPassword(),

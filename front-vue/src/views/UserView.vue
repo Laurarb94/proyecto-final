@@ -1,5 +1,5 @@
 <script setup>
-import UserComponent from '@/components/icons/UserComponent.vue';
+import UserComponent from '@/components/UserComponent.vue';
 </script>
 <template>
     <div class="text-center">
