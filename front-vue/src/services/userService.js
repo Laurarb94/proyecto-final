@@ -1,5 +1,4 @@
 import axios from "axios";
-import { toRaw } from "vue";
 
 const API_URL ="http://127.0.0.1:8000/api/user";
 
@@ -65,7 +64,7 @@ export const registerUser = async (userData) => {
         const response = await axios.post("http://127.0.0.1:8000/api/registration", userData);
 
         return response.data;
-        
+
     }catch(error){
         console.log("Error al registrar al usuario: ", error.response ? error.response.data : error.message);
         throw error;

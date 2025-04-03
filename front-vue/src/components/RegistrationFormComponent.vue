@@ -1,7 +1,7 @@
 <script setup>
 import { registerUser } from '@/services/userService';
 import { ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRouter } from 'vue-router';
 
 //Definir al usuario como un objeto reactivo
 const user = ref({
@@ -18,17 +18,18 @@ const user = ref({
 });
 
 //Obtienes el router:
-const router = useRoute();
+const router = useRouter();
 
 //Función para registrar a un usuario
 const handleRegister = async() => {
     try{
-        const response = await registerUser(user.value);
-        alert(response.message); 
-        //Redirigir al usuario después del registro a otra página:
-        router.push({ name: '/'});
+      const response = await registerUser(user.value);
+      console.log("Respuesta completa del backend: ", response);
+      alert(response.message || "Usuario registrado con éxito");
+
+      router.push({ name: 'dashboardUser'}); //Redirigir al usuario después del registro a la página privada
     }catch(error){
-        alert(error.response?.data.error || 'Error en el registro');
+      alert(error.response?.data.error || 'Error en el registro');
     }
 };
 
@@ -107,8 +108,8 @@ const cancelEdit = () => {
 
             <button type="button" class="btn btn-secondary" @click="cancelEdit">Cancelar registro</button>
             <button type="submit" class="btn btn-primary">Registrase</button>
-        
+
         </form>
     </div>
-  
+
 </template>
