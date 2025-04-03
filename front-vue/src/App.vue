@@ -1,5 +1,4 @@
 <script setup>
-import UserComponent from './components/UserComponent.vue';
 
 </script>
 
@@ -18,12 +17,12 @@ import UserComponent from './components/UserComponent.vue';
             <RouterLink to="#" class="nav-link">Log in</RouterLink>
           </li>
           <li class="">
-            <RouterLink to="#" class="nav-link">Regístrate</RouterLink>
+            <RouterLink to="/registerUser" class="nav-link">Regístrate</RouterLink>
           </li>
         </ul>
       </div>
     </nav>
-    
+
     <RouterView />
 
     <footer class="bg-dark text-white text-center py-3 mt-4">
@@ -31,7 +30,7 @@ import UserComponent from './components/UserComponent.vue';
 
     </footer>
 
-  </div>  
+  </div>
 </template>
 
 <style scoped>
