@@ -2,6 +2,7 @@
 import { registerUser } from '@/services/userService';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import Swal from 'sweetalert2';
 
 //Definir al usuario como un objeto reactivo
 const user = ref({
@@ -25,11 +26,29 @@ const handleRegister = async() => {
     try{
       const response = await registerUser(user.value);
       console.log("Respuesta completa del backend: ", response);
-      alert(response.message || "Usuario registrado con éxito");
+     // alert(response.message || "Usuario registrado con éxito");
+
+     await Swal.fire({
+      title: '¡Registro exitoso!',
+      text: 'Tu cuenta ha sido creada con éxito',
+      icon: 'success',
+      confirmButtonText: 'Ir a tu página privada',
+      background: '#f8f9fa',
+      customClass: {
+        popup: 'rounded-4 shadow-lg',
+        title: 'fw-bold',
+        confirmButton: 'btn btn-primary'
+      }
+     });
 
       router.push({ name: 'dashboardUser'}); //Redirigir al usuario después del registro a la página privada
     }catch(error){
-      alert(error.response?.data.error || 'Error en el registro');
+      Swal.fire({
+        title: 'Error en el registro',
+        text: error.response?.data?.error || 'Ha ocurrido un error inesperado',
+        icon: 'error',
+        confirmButtonText: 'Intentar de nuevo'
+      });
     }
 };
 
