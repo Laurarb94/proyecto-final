@@ -9,6 +9,7 @@
     "dist",
     "src/components/HelloWorld.vue",
     "src/components/TheWelcome.vue",
-    "src/components/WelcomeItem.vue"
+    "src/components/WelcomeItem.vue",
+    "src/components/Dashboard"
   ]
 }

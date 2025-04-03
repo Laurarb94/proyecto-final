@@ -1,4 +1,5 @@
 import axios from "axios";
+import { toRaw } from "vue";
 
 const API_URL ="http://127.0.0.1:8000/api/user";
 
@@ -44,10 +45,10 @@ export const editUser = async (userId, userData) => {
       console.log("Error al editar el usuario: ", error);
       throw error;
     }
-  };
+};
 
-  //Eliminar al usuario
-  export const deleteUser = async (userId) =>{
+//Eliminar al usuario
+export const deleteUser = async (userId) =>{
     try{
         const response = await axios.delete(`${API_URL}/${userId}`);
         return response.data;
@@ -56,3 +57,18 @@ export const editUser = async (userId, userData) => {
         throw error;
     }
 };
+
+//Registrar usuarios
+export const registerUser = async (userData) => {
+    try{
+        console.log("Datos enviados al backend: ", userData);
+        const response = await axios.post("http://127.0.0.1:8000/api/registration", userData);
+
+        return response.data;
+        
+    }catch(error){
+        console.log("Error al registrar al usuario: ", error.response ? error.response.data : error.message);
+        throw error;
+    }
+};
+
