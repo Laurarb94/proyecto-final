@@ -2,16 +2,35 @@ security:
     # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
-        users_in_memory: { memory: null }
+        #users_in_memory: { memory: null }
+        app_user_provider:
+           entity: 
+              class: App\Entity\User
+              property: email
+
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+
         main:
             lazy: true
-            provider: users_in_memory
+            provider: app_user_provider
+        
+        api:
+            pattern: ^/api  # Aplica para todas las rutas que comienzan con /api
+            stateless: true  # No se mantiene estado (sin sesiones)
+            json_login:  # Configuración de login basado en JSON
+                login_path: /api/login  # Ruta donde el cliente enviará el login
+                check_path: /api/login  # Ruta que Symfony usará para autenticar
+                success_handler: App\Security\LoginSuccessHandler
+                failure_handler: App\Security\LoginFailureHandler
+            logout:
+                path: /api/logout  # Ruta de logout
+                invalidate_session: false  # No se usa sesión
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
@@ -22,6 +41,8 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
+        #  - { path:  ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        #  - { path: ^/api/logout, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
 
