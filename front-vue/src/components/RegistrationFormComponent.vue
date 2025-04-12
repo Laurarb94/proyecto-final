@@ -21,35 +21,53 @@ const user = ref({
 //Obtienes el router:
 const router = useRouter();
 
-//Función para registrar a un usuario
+//Registrar al usuario
 const handleRegister = async() => {
-    try{
-      const response = await registerUser(user.value);
-      console.log("Respuesta completa del backend: ", response);
-     // alert(response.message || "Usuario registrado con éxito");
+    try {
+        const formData = new FormData();
+        formData.append('name', user.value.name);
+        formData.append('last_name1', user.value.last_name1);
+        formData.append('last_name2', user.value.last_name2);
+        formData.append('email', user.value.email);
+        formData.append('password', user.value.password);
+        formData.append('phone', user.value.phone);
+        formData.append('country', user.value.country);
+        formData.append('city', user.value.city);
+        formData.append('biography', user.value.biography);
 
-     await Swal.fire({
-      title: '¡Registro exitoso!',
-      text: 'Tu cuenta ha sido creada con éxito',
-      icon: 'success',
-      confirmButtonText: 'Ir a tu página privada',
-      background: '#f8f9fa',
-      customClass: {
-        popup: 'rounded-4 shadow-lg',
-        title: 'fw-bold',
-        confirmButton: 'btn btn-primary'
-      }
-     });
+        // Adjuntar los archivos
+        if (user.value.photo) {
+            formData.append('photo', user.value.photo);
+        }
+        if (user.value.cv) {
+            formData.append('cv', user.value.cv);
+        }
 
-      router.push({ name: 'dashboardUser'}); //Redirigir al usuario después del registro a la página privada
-    }catch(error){
-      Swal.fire({
-        title: 'Error en el registro',
-        text: error.response?.data?.error || 'Ha ocurrido un error inesperado',
-        icon: 'error',
-        confirmButtonText: 'Intentar de nuevo'
-      });
-    }
+        const response = await registerUser(formData);
+        console.log("Respuesta completa del backend: ", response);
+
+        await Swal.fire({
+            title: '¡Registro exitoso!',
+            text: 'Tu cuenta ha sido creada con éxito',
+            icon: 'success',
+            confirmButtonText: 'Ir a tu página privada',
+            background: '#f8f9fa',
+            customClass: {
+                popup: 'rounded-4 shadow-lg',
+                title: 'fw-bold',
+                confirmButton: 'btn btn-primary'
+            }
+        });
+
+        router.push({ name: 'dashboardUser'}); // Redirigir después del registro
+    } catch (error) {
+        Swal.fire({
+            title: 'Error en el registro',
+            text: error.response?.data?.error || 'Ha ocurrido un error inesperado',
+            icon: 'error',
+            confirmButtonText: 'Intentar de nuevo'
+    });
+}
 };
 
 //Función para cancelar el registro
@@ -68,13 +86,19 @@ const cancelEdit = () => {
     };
 };
 
+const handleFileChange = (field, event) =>{
+    const file = event.target.files[0];
+    if(file){
+        user.value[field] = file;
+    }
+}
 
 </script>
 
 <template>
     <div class="container mt-5">
         <h2>Formulario de registro</h2>
-        <form @submit.prevent="handleRegister">
+        <form @submit.prevent="handleRegister" enctype="multipart/form-data">
             <div class="mb-3">
                 <label for="name" class="form-label">Nombre</label>
                 <input v-model="user.name" type="text" id="name" class="form-control" required>
@@ -116,13 +140,18 @@ const cancelEdit = () => {
             </div>
 
             <div class="mb-3">
-                <label for="photo" class="form-label">Foto</label>
-                <input v-model="user.photo" type="text" id="photo" class="form-control" />
+                <label for="biography" class="form-label">Biografía</label>
+                <textarea v-model="user.biography" type="text" id="biography" class="form-control" rows="10"></textarea>
             </div>
 
             <div class="mb-3">
-                <label for="biography" class="form-label">Biografía</label>
-                <textarea v-model="user.biography" type="text" id="biography" class="form-control" rows="10"></textarea>
+                <label for="photo" class="form-label">Foto</label>
+                <input type="file" id="photo" class="form-control" @change="handleFileChange('photo', $event)" />
+            </div>
+
+            <div class="mb-3">
+                <label for="cv" class="form-label">CV</label>
+                <input type="file" id="cv" class="form-control" @change="handleFileChange('cv', $event)" />
             </div>
 
             <button type="button" class="btn btn-secondary" @click="cancelEdit">Cancelar registro</button>
