@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Form\Extension\Core\DataTransformer\StringToFloatTransformer;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
@@ -71,6 +72,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\ManyToMany(targetEntity: Course::class, inversedBy:'students')]
     private Collection $courses;
 
+    #[ORM\Column(type: 'string', length: 255, nullable: 'true')]
+    private ?string $cv = null;
 
 
 
@@ -293,6 +296,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
 
+    //----CV
+    public function getCv(): ?string
+    {
+        return $this->cv;
+    }
+
+    public function setCv(?string $cv): self
+    {
+        $this->cv = $$cv;
+        return $this;
+    }
 
 
 
