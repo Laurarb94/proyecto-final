@@ -171,17 +171,17 @@ const handleFileChange = (field, event) =>{
             <label for="phone" class="form-label">Teléfono</label>
             <input v-model="user.phone" type="number" id="phone" class="form-control" required />
           </div>
-          
-          <div class="mb-3">
-            <label for="city" class="form-label">Ciudad</label>
-            <input v-model="user.city" type="text" id="city" class="form-control" required />
-          </div>
-          
+
           <div class="mb-3">
             <label for="country" class="form-label">País</label>
             <input v-model="user.country" type="text" id="country" class="form-control" required />
           </div>
           
+          <div class="mb-3">
+            <label for="city" class="form-label">Ciudad</label>
+            <input v-model="user.city" type="text" id="city" class="form-control" required />
+          </div>
+           
           <div class="mb-3">
             <label for="biography" class="form-label">Biografía</label>
             <textarea v-model="user.biography" type="text" id="biography" class="form-control" rows="3"></textarea>
