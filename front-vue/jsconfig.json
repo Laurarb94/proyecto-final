@@ -10,6 +10,11 @@
     "src/components/HelloWorld.vue",
     "src/components/TheWelcome.vue",
     "src/components/WelcomeItem.vue",
-    "src/components/Dashboard"
+    "src/components/Dashboard",
+    "src/components/EmailPasswordForm.vue",
+    "src/components/PersonalDataForm-vue",
+    "src/components/FileUploadForm.vue"
+
+
   ]
 }
