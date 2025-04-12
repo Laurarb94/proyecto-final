@@ -302,9 +302,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->cv;
     }
 
-    public function setCv(?string $cv): self
+    public function setCv(string $cv): self
     {
-        $this->cv = $$cv;
+        $this->cv = $cv;
         return $this;
     }
 
