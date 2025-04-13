@@ -21,8 +21,10 @@ export default {
         // Llamamos al servicio de login
         const response = await loginUser(this.email, this.password);
         console.log("Login exitoso:", response);
-        // Puedes guardar el token o los datos del usuario en el estado global
-        // Si usas Vuex, aquí podrías hacer un commit para guardar los datos
+
+        localStorage.setItem('userId', response.id);
+        localStorage.setItem('token', response.jwt); //guardas el token (en el controlador en symfpony al token le has llamado jwt) para poder controlar rutas y quién entra y quién no
+
         this.$router.push('/dashboardUser'); // Redirigir a la página de inicio después de un login exitoso
       } catch (error) {
         // Si ocurre un error, mostrar un mensaje

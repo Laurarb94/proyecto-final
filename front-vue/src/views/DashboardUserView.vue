@@ -1,7 +1,54 @@
 <script>
+import { logoutUser } from '@/services/authService';
+import { getUserById } from '@/services/userService';
+
 export default {
   name: 'DashboardUserView',
+
+  data() {
+    return {
+      user:{}, //inicializas como objeto vacío
+    };
+  },
+  created(){
+    this.fetchUserData(); //llamas a la función para que te devuleva los datos del usuario
+  },
+  methods: {
+    //Método para obtener los datos del usuario al hacer login
+    async fetchUserData() {
+      try{
+        const userId = localStorage.getItem('userId'); //obtienes el userId desde el localStorage
+
+        if(userId){
+          this.user = await getUserById(userId);
+        }else{
+          console.log("Usuario no autenticado");
+        }
+      }catch(error){
+        console.log("Error al obtener los datos del usuario: ", error);
+      }
+    },
+
+    //Método para hacer el logout
+    async logout(){
+      try{
+        //llamar al servicio del logout
+        await logoutUser();
+
+        //Limpiar el localStorage:
+        localStorage.removeItem("id");
+        localStorage.removeItem("token");
+
+        //Redirigir a la página principal
+        this.$router.push("/");
+      }catch(error){
+        console.log("Error al hacer el logout: ", error);
+      }
+    }
+  }
 };
+
+
 </script>
 
 <template>
@@ -13,8 +60,8 @@ export default {
         <div class="card">
           <img src="" alt="Foto de perfil" class="card-img-top img-fluid" />
           <div class="card-body">
-            <h5 class="card-title">Bienvenido</h5>
-            <p class="card-text">Esta es tu biografía:</p>
+            <h5 class="card-title" v-if="user.name">Bienvenido, {{ user.name }}</h5>
+            <p class="card-text">Biografía: {{ user.biography }} </p>
             <p><a href="#" class="btn btn-primary">Ver CV</a></p>
           </div>
         </div>
@@ -44,6 +91,8 @@ export default {
           </div>
         </div>
       </div>
+
+      <button @click="logout">Cerrar sesión</button>
 
       <!-- Barra lateral derecha: Cursos y mensajes -->
       <div class="col-md-3">
