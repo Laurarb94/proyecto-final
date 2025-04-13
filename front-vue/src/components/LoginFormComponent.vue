@@ -6,8 +6,16 @@ export default {
     return {
       email: '',
       password: '',
-      errorMessage: ''
+      errorMessage: '',
+      fromRegistration: false //variable que controla el mensaje
     };
+  },
+  created(){
+    //verificar si vienes del registro
+    const fromRegistration = this.$route.query.fromRegistration;
+    if(fromRegistration){
+      this.fromRegistration = true;
+    }
   },
   methods: {
     async handleLogin() {
@@ -15,7 +23,6 @@ export default {
         this.errorMessage = "Por favor, ingresa un correo y contraseña válido";
         return;
       }
-
 
       try {
         // Llamamos al servicio de login
@@ -39,6 +46,10 @@ export default {
 <template>
   <div class="container mt-4">
       <h2>Loguéate</h2>
+      <!--Si viene del registro, mostrar mensaje para terminar de registrarse-->
+      <div v-if="fromRegistration" class="alert alert-info">
+        <strong>¡Bienvenido/a!</strong>Para finalizar tu registro, por favor inicia sesión.
+      </div>
     <div>
       <form @submit.prevent="handleLogin" class="bg-lught p-4 rounded shadow">
         <div class="mb-3">
