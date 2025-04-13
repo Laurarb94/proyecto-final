@@ -6,8 +6,16 @@ export default {
     return {
       email: '',
       password: '',
-      errorMessage: ''
+      errorMessage: '',
+      fromRegistration: false //variable que controla el mensaje
     };
+  },
+  created(){
+    //verificar si vienes del registro
+    const fromRegistration = this.$route.query.fromRegistration;
+    if(fromRegistration){
+      this.fromRegistration = true;
+    }
   },
   methods: {
     async handleLogin() {
@@ -16,13 +24,14 @@ export default {
         return;
       }
 
-
       try {
         // Llamamos al servicio de login
         const response = await loginUser(this.email, this.password);
         console.log("Login exitoso:", response);
-        // Puedes guardar el token o los datos del usuario en el estado global
-        // Si usas Vuex, aquí podrías hacer un commit para guardar los datos
+
+        localStorage.setItem('userId', response.id);
+        localStorage.setItem('token', response.jwt); //guardas el token (en el controlador en symfpony al token le has llamado jwt) para poder controlar rutas y quién entra y quién no
+
         this.$router.push('/dashboardUser'); // Redirigir a la página de inicio después de un login exitoso
       } catch (error) {
         // Si ocurre un error, mostrar un mensaje
@@ -37,6 +46,10 @@ export default {
 <template>
   <div class="container mt-4">
       <h2>Loguéate</h2>
+      <!--Si viene del registro, mostrar mensaje para terminar de registrarse-->
+      <div v-if="fromRegistration" class="alert alert-info">
+        <strong>¡Bienvenido/a!</strong>Para finalizar tu registro, por favor inicia sesión.
+      </div>
     <div>
       <form @submit.prevent="handleLogin" class="bg-lught p-4 rounded shadow">
         <div class="mb-3">
