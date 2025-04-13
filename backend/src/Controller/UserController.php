@@ -56,6 +56,7 @@ final class UserController extends AbstractController{
             'photo'=>$user->getPhoto(),
             'biography'=>$user->getBiography(),
             'roles'=>$user->getRoles(),
+            'cv'=>$user->getCV(),
         ], Response::HTTP_OK);
     }
 
