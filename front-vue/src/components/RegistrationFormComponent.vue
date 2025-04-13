@@ -64,8 +64,6 @@ const handleRegister = async() => {
         const response = await registerUser(formData);
         console.log("Respuesta completa del backend: ", response);
 
-        localStorage.setItem('userId', response.user.id);
-
         await Swal.fire({
             title: '¡Registro exitoso!',
             text: 'Tu cuenta ha sido creada con éxito',
@@ -79,7 +77,6 @@ const handleRegister = async() => {
             }
         });
 
-        router.push({ name: 'dashboardUser'}); // Redirigir después del registro
     } catch (error) {
         Swal.fire({
             title: 'Error en el registro',
@@ -88,6 +85,8 @@ const handleRegister = async() => {
             confirmButtonText: 'Intentar de nuevo'
         });
     }
+
+    router.push({ path: '/api/login', query: { fromRegistration: true } });
 };
 
 //Función para cancelar el registro
