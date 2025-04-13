@@ -12,15 +12,18 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
+use Psr\Log\LoggerInterface;
 
 
 final class SecurityController extends AbstractController
 {
     private $em;
+    private $logger;
 
-    public function __construct(EntityManagerInterface $em)
+    public function __construct(EntityManagerInterface $em, LoggerInterface $logger)
     {
         $this->em = $em;
+        $this->logger = $logger;
     }
 
     #[Route('/api/login', name: 'api_login', methods: ['POST'])]
@@ -72,6 +75,7 @@ final class SecurityController extends AbstractController
             }
 
             return $this->json([
+                'id'  => $user->getId(), //añades el id para poder pasarlo al front y que se guarde el id y lo vincule cuando se loguee 
                 'name' => $user->getName(),
                 'token' => $jwt
             ]);
@@ -90,6 +94,7 @@ final class SecurityController extends AbstractController
     #[Route('/api/logout', name: 'api_logout', methods: ['POST'])]
     public function apiLogout(): JsonResponse
     {
+        $this->logger->info('Logout called');
         return new JsonResponse([ 'message' => 'Logout exitoso'], JsonResponse::HTTP_OK);
     }
 
