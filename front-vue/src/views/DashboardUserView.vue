@@ -20,7 +20,11 @@ export default {
         const userId = localStorage.getItem('userId'); //obtienes el userId desde el localStorage
 
         if(userId){
+          const response=await getUserById(userId);//nuevo
+          console.log("datos usuario", response.data); //nuevo
           this.user = await getUserById(userId);
+          console.log(this.user);
+
         }else{
           console.log("Usuario no autenticado");
         }
@@ -58,22 +62,13 @@ export default {
       <!-- Barra lateral izquierda (Perfil y opciones) -->
       <div class="col-md-3">
         <div class="card">
-          <img src="" alt="Foto de perfil" class="card-img-top img-fluid" />
+          <img v-if="user.photo" :src="`http://localhost:8000/uploads/profile_photos/${user.photo}`" alt="Foto de perfil" class="card-img-top img-fluid" />
           <div class="card-body">
-            <h5 class="card-title" v-if="user.name">Bienvenido, {{ user.name }}</h5>
+            <h5 class="card-title" v-if="user.name">Bienvenido/a, {{ user.name }}</h5>
             <p class="card-text">Biografía: {{ user.biography }} </p>
-            <p><a href="#" class="btn btn-primary">Ver CV</a></p>
+            <a v-if="user.cv" :href= "`http://localhost:8000/uploads/cvs/${user.cv}`" class="btn btn-primary" target="_blank">Ver CV</a>
           </div>
         </div>
-
-        <!-- Menú de navegación -->
-        <nav class="mt-4">
-          <ul class="list-group">
-            <li class="list-group-item"><a href="#">Mensajes</a></li>
-            <li class="list-group-item"><a href="#">Ajustes</a></li>
-            <li class="list-group-item"><a href="#">Cursos</a></li>
-          </ul>
-        </nav>
       </div>
 
       <!-- Centro: Ofertas activas -->
@@ -91,8 +86,6 @@ export default {
           </div>
         </div>
       </div>
-
-      <button @click="logout">Cerrar sesión</button>
 
       <!-- Barra lateral derecha: Cursos y mensajes -->
       <div class="col-md-3">
