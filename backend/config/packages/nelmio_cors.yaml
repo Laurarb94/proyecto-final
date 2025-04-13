@@ -7,4 +7,5 @@ nelmio_cors:
         expose_headers: ['Link']
         max_age: 3600
     paths:
-        '^/': null
+        #'^/': null
+        '^/api/': ~ #con esto te aseguras que todas las rutas que empiecen con /api reciban la configuración de CORS de arriba

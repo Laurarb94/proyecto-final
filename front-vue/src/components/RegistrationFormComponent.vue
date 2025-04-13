@@ -19,7 +19,7 @@ const user = ref({
     cv:''
 });
 
-//Estado para controlar los pasos: 
+//Estado para controlar los pasos:
 const step = ref(1); //inicias en el paso 1
 
 //Obtienes el router:
@@ -77,7 +77,6 @@ const handleRegister = async() => {
             }
         });
 
-        router.push({ name: 'dashboardUser'}); // Redirigir después del registro
     } catch (error) {
         Swal.fire({
             title: 'Error en el registro',
@@ -86,6 +85,8 @@ const handleRegister = async() => {
             confirmButtonText: 'Intentar de nuevo'
         });
     }
+
+    router.push({ path: '/api/login', query: { fromRegistration: true } });
 };
 
 //Función para cancelar el registro
@@ -119,7 +120,7 @@ const handleFileChange = (field, event) =>{
 <template>
       <div class="container mt-5">
     <h2>Formulario de Registro</h2>
-    
+
     <!-- PAso 1 -->
     <div v-if="step === 1" class="card shadow-sm mb-4">
       <div class="card-header">
@@ -131,12 +132,12 @@ const handleFileChange = (field, event) =>{
             <label for="email" class="form-label">Email</label>
             <input v-model="user.email" type="email" id="email" class="form-control" required />
           </div>
-          
+
           <div class="mb-3">
             <label for="password" class="form-label">Contraseña</label>
             <input v-model="user.password" type="password" id="password" class="form-control" required />
           </div>
-          
+
           <div class="d-flex justify-content-between">
             <button type="button" class="btn btn-secondary" @click="cancelEdit">Cancelar</button>
             <button type="submit" class="btn btn-primary">Siguiente</button>
@@ -156,17 +157,17 @@ const handleFileChange = (field, event) =>{
             <label for="name" class="form-label">Nombre</label>
             <input v-model="user.name" type="text" id="name" class="form-control" required />
           </div>
-          
+
           <div class="mb-3">
             <label for="last_name1" class="form-label">Primer Apellido</label>
             <input v-model="user.last_name1" type="text" id="last_name1" class="form-control" required />
           </div>
-          
+
           <div class="mb-3">
             <label for="last_name2" class="form-label">Segundo Apellido</label>
             <input v-model="user.last_name2" type="text" id="last_name2" class="form-control" required />
           </div>
-          
+
           <div class="mb-3">
             <label for="phone" class="form-label">Teléfono</label>
             <input v-model="user.phone" type="number" id="phone" class="form-control" required />
@@ -176,12 +177,12 @@ const handleFileChange = (field, event) =>{
             <label for="country" class="form-label">País</label>
             <input v-model="user.country" type="text" id="country" class="form-control" required />
           </div>
-          
+
           <div class="mb-3">
             <label for="city" class="form-label">Ciudad</label>
             <input v-model="user.city" type="text" id="city" class="form-control" required />
           </div>
-           
+
           <div class="mb-3">
             <label for="biography" class="form-label">Biografía</label>
             <textarea v-model="user.biography" type="text" id="biography" class="form-control" rows="3"></textarea>
@@ -206,7 +207,7 @@ const handleFileChange = (field, event) =>{
             <label for="photo" class="form-label">Foto de Perfil</label>
             <input type="file" id="photo" class="form-control" @change="handleFileChange('photo', $event)" />
           </div>
-          
+
           <div class="mb-3">
             <label for="cv" class="form-label">Currículum Vitae (PDF)</label>
             <input type="file" id="cv" class="form-control" @change="handleFileChange('cv', $event)" />

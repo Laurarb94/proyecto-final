@@ -1,7 +1,58 @@
 <script>
+import { logoutUser } from '@/services/authService';
+import { getUserById } from '@/services/userService';
+
 export default {
   name: 'DashboardUserView',
+
+  data() {
+    return {
+      user:{}, //inicializas como objeto vacío
+    };
+  },
+  created(){
+    this.fetchUserData(); //llamas a la función para que te devuleva los datos del usuario
+  },
+  methods: {
+    //Método para obtener los datos del usuario al hacer login
+    async fetchUserData() {
+      try{
+        const userId = localStorage.getItem('userId'); //obtienes el userId desde el localStorage
+
+        if(userId){
+          const response=await getUserById(userId);//nuevo
+          console.log("datos usuario", response.data); //nuevo
+          this.user = await getUserById(userId);
+          console.log(this.user);
+
+        }else{
+          console.log("Usuario no autenticado");
+        }
+      }catch(error){
+        console.log("Error al obtener los datos del usuario: ", error);
+      }
+    },
+
+    //Método para hacer el logout
+    async logout(){
+      try{
+        //llamar al servicio del logout
+        await logoutUser();
+
+        //Limpiar el localStorage:
+        localStorage.removeItem("id");
+        localStorage.removeItem("token");
+
+        //Redirigir a la página principal
+        this.$router.push("/");
+      }catch(error){
+        console.log("Error al hacer el logout: ", error);
+      }
+    }
+  }
 };
+
+
 </script>
 
 <template>
@@ -11,22 +62,13 @@ export default {
       <!-- Barra lateral izquierda (Perfil y opciones) -->
       <div class="col-md-3">
         <div class="card">
-          <img src="" alt="Foto de perfil" class="card-img-top img-fluid" />
+          <img v-if="user.photo" :src="`http://localhost:8000/uploads/profile_photos/${user.photo}`" alt="Foto de perfil" class="card-img-top img-fluid" />
           <div class="card-body">
-            <h5 class="card-title">Bienvenido</h5>
-            <p class="card-text">Esta es tu biografía:</p>
-            <p><a href="#" class="btn btn-primary">Ver CV</a></p>
+            <h5 class="card-title" v-if="user.name">Bienvenido/a, {{ user.name }}</h5>
+            <p class="card-text">Biografía: {{ user.biography }} </p>
+            <a v-if="user.cv" :href= "`http://localhost:8000/uploads/cvs/${user.cv}`" class="btn btn-primary" target="_blank">Ver CV</a>
           </div>
         </div>
-
-        <!-- Menú de navegación -->
-        <nav class="mt-4">
-          <ul class="list-group">
-            <li class="list-group-item"><a href="#">Mensajes</a></li>
-            <li class="list-group-item"><a href="#">Ajustes</a></li>
-            <li class="list-group-item"><a href="#">Cursos</a></li>
-          </ul>
-        </nav>
       </div>
 
       <!-- Centro: Ofertas activas -->

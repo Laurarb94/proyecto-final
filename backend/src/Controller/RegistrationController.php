@@ -128,7 +128,18 @@ final class RegistrationController extends AbstractController{
          $em->flush();
  
          //Responder con el usuario registrado
-         return new JsonResponse(['message'=>'Usuario registrado con éxito'], JsonResponse::HTTP_CREATED);
+         //return new JsonResponse(['message'=>'Usuario registrado con éxito'], JsonResponse::HTTP_CREATED);
+
+         //Devolver la respuesta con la url de foto y cv
+         $userData = [
+            'id' => $user->getId(),
+            'name' => $user->getName(),
+            'biography' => $user->getBiography(),
+            'photo' => '/uploads/profile_photos/' . $photoName, // URL de la foto
+            'cv' => '/uploads/cvs/' . $cvName, // URL del CV
+        ];
+
+        return new JsonResponse($userData, JsonResponse::HTTP_CREATED);
 
     }
 
