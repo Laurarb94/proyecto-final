@@ -53,6 +53,9 @@ final class JobOfferController extends AbstractController{
     #[Route('', methods: ['POST'])]
     public function create(Request $request, EntityManagerInterface $em): JsonResponse
     {
+        //llamas al voter, si devuelve true symfony va a lanzar automáticamemte un 403 forbiden
+        $this->denyAccessUnlessGranted('JOB_OFFER_GET'); 
+
         $data = json_decode($request->getContent(), true);
 
         $offer = new JobOffer();
@@ -72,6 +75,8 @@ final class JobOfferController extends AbstractController{
     #[Route('/{id}', methods: ['PUT'])]
     public function update(Request $request, EntityManagerInterface $em, JobOffer $offer): JsonResponse
     {
+        $this->denyAccessUnlessGranted('JOB_OFFER_EDIT');
+
         $data = json_decode($request->getContent(), true);
 
         $offer->setTitle($data['title']);
@@ -88,6 +93,8 @@ final class JobOfferController extends AbstractController{
     #[Route('/{id}', methods: ['DELETE'])]
     public function delete(JobOffer $offer, EntityManagerInterface $em): JsonResponse
     {
+        $this->denyAccessUnlessGranted('JOB_OFFER_DELETE');
+
         $em->remove($offer);
         $em->flush();
 
