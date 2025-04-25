@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use App\Entity\User;
+
 use App\Repository\JobOfferRepository;
 use Collator;
 use Doctrine\DBAL\Types\Types;
@@ -32,10 +34,16 @@ class JobOffer
     #[ORM\Column(nullable: true)]
     private ?string $salary = null;
 
+
     //----------------------------Relación ofertas de trabajo y usuario, a través de aplicación------------------------------------
     //Relación uno a muchos con aplicar: Una oferta de trabajo puede tener muchas aplicaciones de usuario
     #[ORM\OneToMany(mappedBy:'jobOffer', targetEntity: Application::class)]
     private Collection $applications;
+
+    //-----------------------------Relación de oferta de empleo con usuario para saber el usuario que ha publicado la oferta---------
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'jobOffers')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $company = null;
 
 
     public function __construct()
@@ -118,6 +126,15 @@ class JobOffer
         return $this->applications;
     }
 
+    public function getCompany(): ?User
+    {
+        return $this->company;
+    }
 
+    public function setCompany(?User $company): static
+    {
+        $this->company = $company;
+        return $this;
+    }
 
 }
