@@ -75,6 +75,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', length: 255, nullable: 'true')]
     private ?string $cv = null;
 
+    //-------------Relación con oefrtas de empleo para obtener las ofertas que haya publicaod el usuario------------------
+    #[ORM\OneToMany(mappedBy: 'company', targetEntity: JobOffer::class)]
+    private Collection $jobOffers;
 
 
     public function __construct()
@@ -82,6 +85,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->roles = [];
         $this->applications = new ArrayCollection(); //incializar la colección de aplicaciones cuando se cree un nuevo usuario
         $this->courses = new ArrayCollection();
+        $this->jobOffers = new ArrayCollection();
     }
 
 
@@ -306,6 +310,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->cv = $cv;
         return $this;
+    }
+
+    //-----jobOffer
+    public function getJobOffers(): Collection
+    {
+        return $this->jobOffers;
     }
 
 
