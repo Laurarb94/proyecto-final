@@ -30,9 +30,30 @@ export default {
         console.log("Login exitoso:", response);
 
         localStorage.setItem('userId', response.id);
-        localStorage.setItem('token', response.jwt); //guardas el token (en el controlador en symfpony al token le has llamado jwt) para poder controlar rutas y quién entra y quién no
+        //localStorage.setItem('token', response.jwt); //guardas el token (en el controlador en symfpony al token le has llamado jwt) para poder controlar rutas y quién entra y quién no
 
-        this.$router.push('/dashboardUser'); // Redirigir a la página de inicio después de un login exitoso
+        //guardar el token en localStorage
+        localStorage.setItem('token', response.token);
+
+        //Decodificar el token JWT para obtener los datos del usuario
+        //const tokenPayLoad = JSON.parse(atob(response.jwt.split('.')[1]));
+        const tokenPayLoad = JSON.parse(atob(response.token.split('.')[1]));
+        console.log('Token Payload: ', tokenPayLoad);
+
+        //verificar el rol del usuario
+        const userRole = tokenPayLoad.role; 
+        console.log('User Role: ', userRole);
+
+        if(userRole === 'ROLE_USER'){
+          this.$router.push('/dashboardUser');
+        }else if(userRole === 'ROLE_COMPANY'){
+          this.$router.push('/dashboardCompany');
+        }else{
+          //manejar casos de error
+          console.log('Error: rol desconocido');
+          this.$router.push('/api/login');
+        }
+
       } catch (error) {
         // Si ocurre un error, mostrar un mensaje
         console.error("Error de login:", error);
