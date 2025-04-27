@@ -20,10 +20,8 @@ export default {
         const userId = localStorage.getItem('userId'); //obtienes el userId desde el localStorage
 
         if(userId){
-          const response=await getUserById(userId);//nuevo
-          console.log("datos usuario", response.data); //nuevo
           this.user = await getUserById(userId);
-          console.log(this.user);
+          console.log("usuario cargado: ", this.user);
 
         }else{
           console.log("Usuario no autenticado");

@@ -318,6 +318,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->jobOffers;
     }
 
+    public function addJobOffer(JobOffer $jobOffer): self
+    {
+        if (!$this->jobOffers->contains($jobOffer)) {
+            $this->jobOffers[] = $jobOffer;
+            $jobOffer->setCompany($this);
+        }
+        
+        return $this;
+    }
+    
+    public function removeJobOffer(JobOffer $jobOffer): self
+    {
+        $this->jobOffers->removeElement($jobOffer);
+        return $this;
+    }
+
 
 
 

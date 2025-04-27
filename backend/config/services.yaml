@@ -26,5 +26,10 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
+    # Configuración para el servicio de Authservice
+    App\Service\AuthService:
+        arguments: 
+            $jwtSecret: '%env(JWT_SECRET)%'
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

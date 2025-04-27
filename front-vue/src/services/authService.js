@@ -30,8 +30,11 @@ export const logoutUser = async () =>{
 
     //Ver si el token está disponible antes de enviar la solicidtud
     if(!token){
-      throw new Error("No se encont´ro el token de autenticación");
+      throw new Error("No se encontró el token de autenticación");
     }
+
+    console.log("Token enviado:", token);  // Asegúrate de que el token esté en el localStorage
+
 
     //haces solicitud post al endpoint del logout
     const response = await axios.post(API_URL_LOGOUT, {}, {
