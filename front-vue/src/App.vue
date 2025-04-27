@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import LogoutButtonComponent from './components/LogoutButtonComponent.vue';
 
 // Verifica si el usuario está logueado (por ejemplo, usando localStorage)
 const user = ref(localStorage.getItem('userId'));  // Si el 'userId' está en localStorage, el usuario está autenticado
@@ -47,11 +48,12 @@ const logout = () => {
           <li class="nav-item">
             <!--Mostrar login si no hay usuario logueado, y logout si el usuario está logueado-->
             <RouterLink v-if="!user" to="/api/login" class="nav-link">Log in</RouterLink>
-            <RouterLink v-if="user" @click.prevent="logout" to="/api/logout" class="nav-link">Log out</RouterLink>
+            <LogoutButtonComponent v-if="user" /> 
           </li>
           <li class="nav-item">
             <!--Mostrar registrarse si no hay usuario logueado-->
             <RouterLink v-if="!user" to="/registerUser" class="nav-link">Regístrate</RouterLink>
+            <RouterLink v-if="!user" to="/registerCompany">¿Eres una empresa? Regístrate aquí</RouterLink>
           </li>
         </ul>
       </div>

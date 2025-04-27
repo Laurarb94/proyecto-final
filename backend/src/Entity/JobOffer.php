@@ -42,7 +42,7 @@ class JobOffer
 
     //-----------------------------Relación de oferta de empleo con usuario para saber el usuario que ha publicado la oferta---------
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'jobOffers')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?User $company = null;
 
 
