@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use ApiPlatform\OpenApi\Model\Response;
+use App\Service\AuthService;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -11,7 +11,6 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
 use Psr\Log\LoggerInterface;
 
 
@@ -19,11 +18,13 @@ final class SecurityController extends AbstractController
 {
     private $em;
     private $logger;
+    private $authService;
 
-    public function __construct(EntityManagerInterface $em, LoggerInterface $logger)
+    public function __construct(EntityManagerInterface $em, LoggerInterface $logger, AuthService $authService)
     {
         $this->em = $em;
         $this->logger = $logger;
+        $this->authService = $authService;
     }
 
     #[Route('/api/login', name: 'api_login', methods: ['POST'])]
@@ -57,10 +58,11 @@ final class SecurityController extends AbstractController
 
         if($passwordHasher->isPasswordValid($user, $data['password'])) {
             $payload = [
-                'iss' => 'http://127.0.0.1:8000',
-                'aud' => $user->getId(),
-                'iat' => time(),
-                'exp' => time() + (30 * 24 * 60 * 60)
+                'iss' => 'http://127.0.0.1:8000', //emisor del token
+                'aud' => $user->getId(), //id del usuario
+                'role' => $user->getRoles()[0], //primer rol del usuario
+                'iat' => time(), //fecha de emisión
+                'exp' => time() + (30 * 24 * 60 * 60) //fecha de expiración (30 días)
             ];
 
             //construyes el token
@@ -90,7 +92,6 @@ final class SecurityController extends AbstractController
 
     }
     
-
     #[Route('/api/logout', name: 'api_logout', methods: ['POST'])]
     public function apiLogout(): JsonResponse
     {
