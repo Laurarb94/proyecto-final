@@ -10,6 +10,10 @@ parameters:
     company_emails: 
        - 'company1@gmail.com'
        - 'company2@gmail.com'
+       - 'company3@gmail.com'
+       - 'company4@gmail.com'
+       - 'company5@gmail.com' 
+       - 'company6@gmail.com'
 
 services:
     # default configuration for services in *this* file

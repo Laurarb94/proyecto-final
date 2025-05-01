@@ -6,6 +6,8 @@ use App\Entity\Category;
 use App\Entity\Subcategory;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
+use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
+
 
 class SubcategoryFixture extends Fixture
 {
@@ -285,5 +287,10 @@ class SubcategoryFixture extends Fixture
 
         // Guardar todos los cambios en la base de datos
         $manager->flush();
+    }
+
+    public function getOrder(): int
+    {
+        return 2;
     }
 }

@@ -6,6 +6,8 @@ use App\Entity\Category;
 use App\Entity\Subcategory;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
+use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
+
 
 class CategoryFixture extends Fixture
 {
@@ -46,5 +48,10 @@ class CategoryFixture extends Fixture
  
          // Guardar las categorías en la base de datos
          $manager->flush();
+    }
+
+    public function getOrder(): int
+    {
+        return 1;
     }
 }
