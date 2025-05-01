@@ -45,6 +45,15 @@ class JobOffer
     #[ORM\JoinColumn(nullable: true)]
     private ?User $company = null;
 
+    #[ORM\ManyToOne(targetEntity: Category::class, inversedBy: 'jobOffers')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Category $category = null;
+    
+    #[ORM\ManyToOne(targetEntity: Subcategory::class, inversedBy: 'jobOffers')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Subcategory $subcategory = null;
+
+
 
     public function __construct()
     {
@@ -136,5 +145,28 @@ class JobOffer
         $this->company = $company;
         return $this;
     }
+
+    public function getCategory(): ?Category
+    {
+        return $this->category;
+    }
+    
+    public function setCategory(?Category $category): static
+    {
+        $this->category = $category;
+        return $this;
+    }
+
+    public function getSubcategory(): ?Subcategory
+    {
+        return $this->subcategory;
+    }
+    
+    public function setSubcategory(?Subcategory $subcategory): static
+    {
+        $this->subcategory = $subcategory;
+        return $this;
+    }
+
 
 }
