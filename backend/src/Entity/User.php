@@ -86,6 +86,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->applications = new ArrayCollection(); //incializar la colección de aplicaciones cuando se cree un nuevo usuario
         $this->courses = new ArrayCollection();
         $this->jobOffers = new ArrayCollection();
+        $this->sentMessages = new ArrayCollection();
+        $this->receivedMessages = new ArrayCollection();
     }
 
 

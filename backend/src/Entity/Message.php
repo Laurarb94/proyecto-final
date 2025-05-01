@@ -25,7 +25,7 @@ class Message
     #[ORM\JoinColumn(nullable:false)]
     private ?User $sender = null;
 
-    #[ORM\ManyToOne(targetEntity: User::class, inversedBy:'recivedMessages')]
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy:'receivedMessages')]
     #[ORM\JoinColumn(nullable:false)]
     private ?User $receiver = null;
 
