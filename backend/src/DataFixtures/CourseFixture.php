@@ -21,7 +21,7 @@ class CourseFixture extends Fixture
             foreach($subcategories as $subcategory){
                 $course = new Course();
                 $course->setTitle('Curso de ' . $subcategory->getName())
-                       ->setContent('Contenido del curso sobre ' . $subcategory->getName())
+                       ->setContent($this->generateRandomContent($subcategory->getName())) // Generar contenido aleatorio
                        ->setCategory($category)
                        ->setSubcategory($subcategory);
 
@@ -30,5 +30,23 @@ class CourseFixture extends Fixture
         }
         
         $manager->flush();
+    }
+
+    private function generateRandomContent($subcategoryName)
+    {
+        $contents = [
+            'Este curso proporciona una comprensión profunda sobre ' . $subcategoryName . '.',
+            'Aprende los conceptos más importantes de ' . $subcategoryName . ' a través de ejemplos prácticos.',
+            'Curso avanzado en ' . $subcategoryName . ', dirigido a profesionales del área.',
+            'En este curso, explorarás las técnicas más actuales en ' . $subcategoryName . '.',
+            'Contenido de alto nivel sobre ' . $subcategoryName . ' para mejorar tus habilidades.'
+        ];
+
+        return $contents[array_rand($contents)];
+    }
+
+    public function getOrder(): int
+    {
+        return 4;
     }
 }
