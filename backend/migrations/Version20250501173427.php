@@ -1,5 +1,5 @@
 <?php
-
+/*
 declare(strict_types=1);
 
 namespace DoctrineMigrations;
@@ -9,7 +9,7 @@ use Doctrine\Migrations\AbstractMigration;
 
 /**
  * Auto-generated Migration: Please modify to your needs!
- */
+ 
 final class Version20250501173427 extends AbstractMigration
 {
     public function getDescription(): string
@@ -67,3 +67,4 @@ final class Version20250501173427 extends AbstractMigration
         $this->addSql('DROP TABLE user_course');
     }
 }
+    */

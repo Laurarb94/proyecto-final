@@ -17,6 +17,9 @@ class Application
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $coverLetter = null;
 
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+    private ?\DateTimeImmutable $createdAt = null;
+
     //-----------------Relación con usuario---------------------------------------
     //Muchos a uno: muchas aplicaciones pueden pertener a un usuario
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy:'applications')]
@@ -70,6 +73,17 @@ class Application
     public function setJobOffer(?JobOffer $jobOffer): self
     {
         $this->jobOffer = $jobOffer;
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+    
+    public function setCreatedAt(\DateTimeImmutable $createdAt): self
+    {
+        $this->createdAt = $createdAt;
         return $this;
     }
 
