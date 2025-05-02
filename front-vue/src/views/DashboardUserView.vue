@@ -23,7 +23,7 @@ export default {
         'Marketing': 'lightbulb',
         'Ciencias Sociales': 'graduation-cap',
         'Humanidades': 'book',
-        'Hosteleria y Turismo': 'plane-departure',
+        'Hosteleria y Turismo': 'utensils',
         'Matemáticas y Estadística':'diagram-project',
         'Ingenierias': 'tools',
       }
@@ -192,12 +192,15 @@ export default {
                     </div>
                     <p class="small mt-2 text-center">{{ category.name }}</p>
                   </div>
+
                   <div v-if="selectedCategoryId === category.id" class="subcategory-list mt-2">
-                    <ul class="list-unstyled">
-                      <li v-for="subcategory in category.subcategories" :key="subcategory.id" @click="selectedSubcategory(subcategory.id)">
-                        <a href="#" class="subcategory-link">{{ subcategory.name }}</a>
-                      </li>
-                    </ul>
+                    <div class="collapse show">
+                      <ul class="list-unstyled">
+                        <li v-for="subcategory in category.subcategories" :key="subcategory.id" @click="selectedSubcategory(subcategory.id)">
+                          <a href="#" class="subcategory-link">{{ subcategory.name }}</a>
+                        </li>
+                      </ul>
+                    </div>
                   </div>
                 </div>
               </div>
