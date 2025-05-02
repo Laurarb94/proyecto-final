@@ -31,7 +31,7 @@ final class ApplicationController extends AbstractController{
 
         // Verificar si ya existe una aplicación
         foreach ($user->getApplications() as $app) {
-            if ($app->getOffer()->getId() === $offer->getId()) {
+            if ($app->getJobOffer()->getId() === $offer->getId()) {
                 return $this->json(['message' => 'Ya has aplicado a esta oferta'], 200);
             }
         }
