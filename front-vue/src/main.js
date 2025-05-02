@@ -12,7 +12,8 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js'
 // Importa las librerías de Font Awesome
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faUser, faHome, faEnvelope, faTrash, faUserPen, faPlus, faLaptop, faStaffSnake, faLightbulb,
-    faGraduationCap, faBook, faPlane, faDiagramProject, faCalculator
+    faGraduationCap, faBook, faPlane, faDiagramProject, faCalculator,
+    faQuestionCircle
  } from '@fortawesome/free-solid-svg-icons' // Importa los íconos que quieras
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
@@ -20,7 +21,7 @@ import '@fortawesome/fontawesome-svg-core/styles.css'
 
 // Añadir los íconos a la librería
 library.add(faUser, faHome, faEnvelope, faTrash, faUserPen, faPlus, faLaptop, faStaffSnake, faLightbulb, 
-    faGraduationCap, faBook, faPlane, faDiagramProject, faCalculator)
+    faGraduationCap, faBook, faPlane, faDiagramProject, faCalculator, faQuestionCircle)
 
 const app = createApp(App);
 app.use(router);

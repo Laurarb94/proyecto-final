@@ -18,14 +18,14 @@ export default {
       appliedOffers: [], //aquí se guardarán las ofertas en las que se postule el usuario
       successMessage: '',
       categoryIcons: {
-        'Informática': 'fa-laptop',
-        'Salud': 'fa-staff-snake',
-        'Marketing': 'fa-lightbulb',
-        'Ciencias Sociales': 'fa-graduation-cap',
-        'Humanidades': 'fa-book',
-        'Hosteleria y Turismo': 'fa-plane',
-        'Matemáticas y Estadística':'fa-diagram-project',
-        'Ingenierias': 'fa-calculator',
+        'Informática': 'laptop',
+        'Salud': 'staff-snake',
+        'Marketing': 'lightbulb',
+        'Ciencias Sociales': 'graduation-cap',
+        'Humanidades': 'book',
+        'Hosteleria y Turismo': 'plane-departure',
+        'Matemáticas y Estadística':'diagram-project',
+        'Ingenierias': 'tools',
       }
     };
   },
@@ -182,26 +182,28 @@ export default {
         <!-- Filtro de categorías con iconos -->
         <div class="card">
           <div class="card-body">
-            <h5 class="card-title">Explora las categorías</h5>
-            <div class="d-flex flex-wrap gap-3 justify-content-start">
-              <div v-for="category in categories" :key="category.id" class="category-item">
-                <div class="category-link" @click="selectedCategoryId = selectedCategoryId === category.id ? null : category.id">
-                  <div class="category-icon">
-                    <i :class="'fas ' + getCategoryIconKey(category.name)"></i>
+            <h5 class="card-title">Explora las categorías y encuentra tu trabajo ideal</h5>
+            <div class="row">
+              <div class="col-6 col-md-3" v-for="category in categories" :key="category.id">
+                <div class="category-item">
+                  <div class="category-link" @click="selectedCategoryId = selectedCategoryId === category.id ? null : category.id">
+                    <div class="category-icon mx-auto">
+                      <font-awesome-icon :icon="['fas', getCategoryIconKey(category.name)]" />
+                    </div>
+                    <p class="small mt-2 text-center">{{ category.name }}</p>
                   </div>
-                  <p class="small mt-2">{{ category.name }}</p>
-                </div>
-                <div v-if="selectedCategoryId === category.id" class="subcategory-list mt-2">
-                  <ul class="list-unstyled">
-                    <li v-for="subcategory in category.subcategories" :key="subcategory.id" @click="selectedSubcategory(subcategory.id)">
-                      <a href="#" class="subcategory-link">{{ subcategory.name }}</a>
-                    </li>
-                  </ul>
+                  <div v-if="selectedCategoryId === category.id" class="subcategory-list mt-2">
+                    <ul class="list-unstyled">
+                      <li v-for="subcategory in category.subcategories" :key="subcategory.id" @click="selectedSubcategory(subcategory.id)">
+                        <a href="#" class="subcategory-link">{{ subcategory.name }}</a>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+          </div> <!--Cierre card-body-->
+        </div> <!--Cierre card-->
 
         <!-- Ofertas de trabajo -->
         <h3 class="mt-4">Ofertas disponibles</h3>
@@ -299,6 +301,7 @@ export default {
   justify-content: center;
   align-items: center;
   margin-bottom: 10px;
+  border-radius: 50%; /* círculo */
 }
 
 .category-item .subcategory-list {
