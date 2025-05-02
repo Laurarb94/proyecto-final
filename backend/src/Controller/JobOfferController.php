@@ -4,7 +4,8 @@ namespace App\Controller;
  
  use App\Entity\JobOffer;
  use App\Repository\JobOfferRepository;
- use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\SubcategoryRepository;
+use Doctrine\ORM\EntityManagerInterface;
  use Symfony\Component\HttpFoundation\JsonResponse;
  use Symfony\Component\HttpFoundation\Request;
  use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -22,6 +23,8 @@ namespace App\Controller;
          $data = [];
  
          foreach($offers as $offer){
+            $subcategory = $offer->getSubcategory(); //añades la subcategoría por que si no, no la filtra!!
+
              $data[] = [
                  'id' =>$offer->getId(),
                  'title'=>$offer->getTitle(),
@@ -29,6 +32,10 @@ namespace App\Controller;
                  'location'=>$offer->getLoation(),
                  'createdAt'=>$offer->getCreatedAt()->format('Y-m-d'),
                  'salary'=>$offer->getSalary(),
+                 'subcategory' => $subcategory ? [
+                    'id' => $subcategory->getId(),
+                    'name' => $subcategory->getName(),
+                 ] : null,
              ];
          }
  
@@ -52,7 +59,7 @@ namespace App\Controller;
  
     //Crear una oferta
     #[Route('', methods: ['POST'])]
-    public function create(Request $request, EntityManagerInterface $em): JsonResponse
+    public function create(Request $request, EntityManagerInterface $em, SubcategoryRepository $subcategoryRepo): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
@@ -62,6 +69,14 @@ namespace App\Controller;
         $offer->setLoation($data['loation']);
         $offer->setCreatedAt(new \DateTimeImmutable());
         $offer->setSalary($data['salary']);
+
+        //Añado esta opción por si en algún momento se crean ofertas, no por fixtures sino por formulario 
+        if(isset($data['subcategoryId'])){
+            $subcategory = $subcategoryRepo->find($data['subactegoryId']);
+            if($subcategory){
+                $offer->setSubcategory($subcategory);
+            }
+        }
           
         $em->persist($offer);
         $em->flush();

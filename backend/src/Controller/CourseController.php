@@ -2,16 +2,31 @@
 
 namespace App\Controller;
 
+use App\Repository\CourseRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+#[Route('/api/courses')]
 final class CourseController extends AbstractController{
-    #[Route('/course', name: 'app_course')]
-    public function index(): Response
+
+    #[Route('', methods: ['GET'])]
+    public function index(CourseRepository $repo): Response
     {
-        return $this->render('course/index.html.twig', [
-            'controller_name' => 'CourseController',
-        ]);
+        $courses = $repo->findAll();
+        $data = [];
+
+        foreach($courses as $course){
+            $data[] = [
+                'id' => $course->getId(),
+                'name' => $course->getName(),
+                'description' => $course->getDescription(),
+                'category' => $course->getCategory()?->getName(),
+                'sucgateory' => $course->getSubcategory()?->getName(),
+            ];
+        }
+
+
+        return $this->json($data);
     }
 }
