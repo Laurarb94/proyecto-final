@@ -3,9 +3,15 @@ import { logoutUser } from '@/services/authService';
 import { getUserById } from '@/services/userService';
 import jobOfferService from '@/services/jobOfferService';
 import categoryService from '@/services/categoryService';
+import applicationService from '@/services/applicationService';
+import Swal from 'sweetalert2';
 
 export default {
   name: 'DashboardUserView',
+
+  props: {
+    offer: Object, 
+  },
 
   data() {
     return {
@@ -26,7 +32,8 @@ export default {
         'Hosteleria y Turismo': 'utensils',
         'Matemáticas y Estadística':'diagram-project',
         'Ingenierias': 'tools',
-      }
+      },
+      userId: null,
     };
   },
 
@@ -40,8 +47,10 @@ export default {
     async fetchUserData() {
       try{
         const userId = localStorage.getItem('userId'); //obtienes el userId desde el localStorage
+        console.log('USER ID desde LOCALSTORAGE: ', userId);
 
         if(userId){
+          this.userId = parseInt(userId);
           this.user = await getUserById(userId);
           //console.log("usuario cargado: ", this.user);
         }else{
@@ -62,7 +71,7 @@ export default {
 
     async fetchSubcategories() {
       const category = this.categories.find(cat => cat.id === parseInt(this.selectedCategoryId));
-      console.log("Categoría seleccionada:", JSON.stringify(category, null, 2));
+      //console.log("Categoría seleccionada:", JSON.stringify(category, null, 2));
 
       if(category && Array.isArray(category.subcategories)){
         this.subcategories = category.subcategories;
@@ -71,7 +80,7 @@ export default {
         this.subcategories = [];
       }
 
-      console.log('Subcategorías (formato array de objetos):', this.subcategories);
+      //console.log('Subcategorías (formato array de objetos):', this.subcategories);
     },
 
     async fetchFilteredOffers(){
@@ -82,14 +91,14 @@ export default {
         
         response.forEach(offer => {
           console.log('Oferta ID: ', offer.id);
-          console.log('Claves de la oferta: ', Object.keys(offer));
+          //console.log('Claves de la oferta: ', Object.keys(offer));
         });
 
         this.offers = response.filter(offer =>
           offer.subcategory && offer.subcategory.id === parseInt(this.selectedSubcategoryId)
         );
 
-        console.log('Ofertas filtradas: ', this.offers);
+        //console.log('Ofertas filtradas: ', this.offers);
 
       } catch (error) {
         console.log('Error al filtrar las ofertas: ', error);
@@ -101,16 +110,46 @@ export default {
       this.selectedSubcategoryId = subcategoryId;
     },
 
-    applyToOffer(offer) {
-      if (!this.appliedOffers.find(o => o.id === offer.id)) {
-        this.appliedOffers.push(offer);
-        this.successMessage = '¡Te has postulado a la oferta con éxito!';
+    async apply(offerId){
+      try {
+        //console.log('USER ID: ', this.userId);
+        const response = await applicationService.applyToOffer(offerId, this.userId);
+        Swal.fire({
+          icon: 'success',
+          title: 'Postulación exitosa',
+          text: response.data.message,
+          confirmButtonText: 'Aceptar'
+        });
+
+        //Mover la oferta a "mis ofertas postuladas"
+        const appliedOffers = this.offers.find(offer => offer.id === offerId); 
+        if(appliedOffers){
+          this.appliedOffers.push(appliedOffers); //moverla a la lista de ofertas aplicadas
+          this.offers = this.offers.filter(offer => offer.id !== offerId); // Eliminarla de las ofertas disponibles
+        }
+
+      } catch (error) {
+        console.log('Error al aplicar: ', error);
+        if(error.response && error.response.data){
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: `Error del servidor: ${error.response.data.error || 'Error desconocido'}`,
+            confirmButtonText: 'Aceptar'
+          });
+        }else{
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Error al aplicar',
+            confirmButtonText: 'Aceptar'
+          });
+        }
       }
     },
 
     getCategoryIconKey(categoryName){
       const icon = this.categoryIcons[categoryName] || 'fa-question-circle'; //si no encuentra la categoría devuelve un icono por defecto
-      console.log("Icono para", categoryName, ":", icon);
       return icon;
     },
 
@@ -217,7 +256,7 @@ export default {
                 <h5 class="card-title">{{ offer.title }}</h5>
                 <p class="card-text">{{ offer.description }}</p>
                 <p><strong>Ubicación:</strong> {{ offer.location }}</p>
-                <button class="btn btn-primary" @click="applyToOffer(offer)">Postularse</button>
+                <button class="btn btn-primary" @click="apply(offer.id)">Postularse</button>
               </div>
             </div>
           </div>
@@ -315,10 +354,15 @@ export default {
   color: #007bff;
   cursor: pointer;
   text-decoration: none;
+  font-weight: bold;
+  display: block;
+  padding: 8px;
+  transition: all 0.3s ease;
 }
 
 .subcategory-link:hover {
   text-decoration: underline;
+  background-color: #f0f8ff;
 }
 
 .category-item .category-link:hover {
