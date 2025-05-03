@@ -19,8 +19,8 @@ final class CourseController extends AbstractController{
         foreach($courses as $course){
             $data[] = [
                 'id' => $course->getId(),
-                'name' => $course->getName(),
-                'description' => $course->getDescription(),
+                'title' => $course->getTitle(),
+                'content' => $course->getContent(),
                 'category' => $course->getCategory()?->getName(),
                 'sucgateory' => $course->getSubcategory()?->getName(),
             ];
