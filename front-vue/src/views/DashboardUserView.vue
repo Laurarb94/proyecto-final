@@ -5,6 +5,7 @@ import jobOfferService from '@/services/jobOfferService';
 import categoryService from '@/services/categoryService';
 import applicationService from '@/services/applicationService';
 import Swal from 'sweetalert2';
+import { onBeforeRouteLeave } from 'vue-router';
 
 export default {
   name: 'DashboardUserView',
@@ -34,6 +35,7 @@ export default {
         'Ingenierias': 'tools',
       },
       userId: null,
+      currentOfferIndex: 0, //lleva el control de la oferta que estás viendo, para luego que el usuario pueda ir cambiándolas
     };
   },
 
@@ -52,7 +54,15 @@ export default {
         if(userId){
           this.userId = parseInt(userId);
           this.user = await getUserById(userId);
-          //console.log("usuario cargado: ", this.user);
+
+          //cargar las postulacionees guardas desde el localStorage
+          const storedApplications = localStorage.getItem('appliedOffers');
+          if(storedApplications){
+            this.appliedOffers = JSON.parse(storedApplications); //cargar desde el localStorage
+          }else{
+            await this.fetchApplications();
+          }
+          
         }else{
           console.log("Usuario no autenticado");
         }
@@ -89,16 +99,13 @@ export default {
       try {
         const response = await jobOfferService.getAll();
         
-        response.forEach(offer => {
-          console.log('Oferta ID: ', offer.id);
-          //console.log('Claves de la oferta: ', Object.keys(offer));
-        });
+        console.log('Ofertas obtenidas: ', response);
 
         this.offers = response.filter(offer =>
           offer.subcategory && offer.subcategory.id === parseInt(this.selectedSubcategoryId)
         );
 
-        //console.log('Ofertas filtradas: ', this.offers);
+        console.log('Ofertas filtradas: ', this.offers);
 
       } catch (error) {
         console.log('Error al filtrar las ofertas: ', error);
@@ -126,6 +133,7 @@ export default {
         if(appliedOffers){
           this.appliedOffers.push(appliedOffers); //moverla a la lista de ofertas aplicadas
           this.offers = this.offers.filter(offer => offer.id !== offerId); // Eliminarla de las ofertas disponibles
+          localStorage.setItem('appliedOffers', JSON.stringify(this.appliedOffers));
         }
 
       } catch (error) {
@@ -148,13 +156,69 @@ export default {
       }
     },
 
+    async fetchApplications(){
+      try {
+        const response = await applicationService.getUserApplications(this.userId);
+        this.appliedOffers = response.data; //guardar postulaciones en el estado local
+
+        localStorage.setItem('appliedOffers', JSON.stringify(this.appliedOffers)); //guardar las posulaciones en el localStorage
+
+      } catch (error) {
+        console.log('Error al obtener las postulaciones: ', error);
+      }
+    },
+
     getCategoryIconKey(categoryName){
       const icon = this.categoryIcons[categoryName] || 'fa-question-circle'; //si no encuentra la categoría devuelve un icono por defecto
       return icon;
     },
 
-    removeApplication(offerId){
-      this.appliedOffers = this.appliedOffers.filter(o => o.id !== offerId);
+    async removeApplication(offerId){
+        // Mostrar un SweetAlert de confirmación antes de eliminar
+        const result = await Swal.fire({
+          title: '¿Estás seguro?',
+          text: 'Una vez eliminada, no podrás recuperar esta postulación.',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Sí, eliminar',
+          cancelButtonText: 'Cancelar',
+          reverseButtons: true,
+        });
+
+        if (result.isConfirmed) {
+          try {
+            const response = await applicationService.deleteApplication(this.userId, offerId);
+            Swal.fire({
+              icon: 'success',
+              title: 'Postulación eliminada',
+              text: response.message,
+              confirmButtonText: 'Aceptar',
+            });
+
+            // Eliminar la oferta de la lista de ofertas postuladas localmente
+            this.appliedOffers = this.appliedOffers.filter(offer => offer.id !== offerId);
+
+          } catch (error) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'No se pudo eliminar la postulación',
+              confirmButtonText: 'Aceptar',
+            });
+          }
+        }
+    },
+
+    nextOffer(){
+      if(this.currentOfferIndex < this.appliedOffers.length -1){
+        this.currentOfferIndex++;
+      }
+    },
+
+    prevOffer(){
+      if(this.currentOfferIndex > 0){
+        this.currentOfferIndex--;
+      }
     },
 
     //Método para hacer el logout
@@ -164,8 +228,10 @@ export default {
         await logoutUser();
 
         //Limpiar el localStorage:
-        localStorage.removeItem("id");
+       // localStorage.removeItem("id");
         localStorage.removeItem("token");
+        localStorage.removeItem('userId');
+        localStorage.removeItem('appliedOffers'); // Limpiar las postulaciones
 
         //Redirigir a la página principal
         this.$router.push("/");
@@ -211,14 +277,14 @@ export default {
           <div class="card-body">
             <h5 class="card-title"> Bienvenido/a, {{ user.name }}</h5>
             <p class="card-text">Biografía: {{ user.biography }}</p>
-            <a v-if="user.cv" :href= "`http://localhost:8000/uploads/cvs/${user.cv}`" class="btn btn-primary" target="_blank">Ver CV</a>
+            <a v-if="user.cv" :href= "`http://localhost:8000/uploads/cvs/${user.cv}`" class="btn btn-primary cv" target="_blank">Ver CV</a>
           </div>
         </div>
       </div>
 
-      <!-- Columna de ofertas -->
+      <!--Columna de ofertas-->
       <div class="col-md-8">
-        <!-- Filtro de categorías con iconos -->
+        <!--Filtro de categorías con iconos-->
         <div class="card">
           <div class="card-body">
             <h5 class="card-title">Explora las categorías y encuentra tu trabajo ideal</h5>
@@ -247,7 +313,7 @@ export default {
           </div> <!--Cierre card-body-->
         </div> <!--Cierre card-->
 
-        <!-- Ofertas de trabajo -->
+        <!--Ofertas de trabajo-->
         <h3 class="mt-4">Ofertas disponibles</h3>
         <div class="row">
           <div v-for="offer in offers" :key="offer.id" class="col-md-6 mb-4">
@@ -256,25 +322,49 @@ export default {
                 <h5 class="card-title">{{ offer.title }}</h5>
                 <p class="card-text">{{ offer.description }}</p>
                 <p><strong>Ubicación:</strong> {{ offer.location }}</p>
-                <button class="btn btn-primary" @click="apply(offer.id)">Postularse</button>
+                <button class="btn btn-primary apply" @click="apply(offer.id)">Postularse</button>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Ofertas postuladas -->
+        <!--Ofertas-->
         <h3 class="mt-5">Mis ofertas postuladas</h3>
-        <div class="row">
-          <div v-for="offer in appliedOffers" :key="offer.id" class="col-md-6 mb-4">
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title">{{ offer.title }}</h5>
-                <p class="card-text">{{ offer.description }}</p>
-                <p><strong>Ubicación:</strong> {{ offer.location }}</p>
-                <button class="btn btn-danger" @click="removeApplication(offer.id)">Eliminar Postulación</button>
-              </div>
+        <div class="card mx-auto position-relative" style="max-width: 600px;"></div>
+        
+        <div v-if="appliedOffers.length > 0" class="position-relative" style="min-height: 200px;">
+          <span>{{ currentOfferIndex +1 }} de {{ appliedOffers.length }}</span>
+          <!--Botón izquierda-->
+          <button 
+            v-if="appliedOffers.length > 1"
+            class="btn btn-secondary prevOffer position-absolute top-50 start-0 translate-middle-y"
+            @click="prevOffer"
+            :disabled="currentOfferIndex === 0">
+            <font-awesome-icon :icon="['fas', 'chevron-left']" />
+          </button>
+          
+          <!--Card de la oferta-->
+          <div class="card mx-auto" style="max-width: 600px;">
+            <div class="card-body">
+              <h5 class="card-title">{{ appliedOffers[currentOfferIndex].title }}</h5>
+              <p class="card-text">{{ appliedOffers[currentOfferIndex].description }}</p>
+              <p><strong>Ubicación: </strong>{{ appliedOffers[currentOfferIndex].location }}</p>
+              <button
+                class="btn btn-danger position-absolute top-0 end-0 m-2"
+                @click="removeApplication(appliedOffers[currentOfferIndex].id)">
+                <font-awesome-icon :icon="['fas', 'trash']" />
+              </button>
             </div>
           </div>
+          
+          <!--Botón derecha-->
+          <button
+            v-if="appliedOffers.length > 1"
+            class="btn btn-secondary position-absolute top-50 end-0 translate-middle-y"
+            @click="nextOffer"
+            :disabled="currentOfferIndex === appliedOffers.length - 1">
+            <font-awesome-icon :icon="['fas', 'chevron-right']" />
+          </button>
         </div>
 
       </div>
@@ -308,69 +398,102 @@ export default {
 
 <style scoped>
 .card {
-  margin-bottom: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease;
+}
+
+.card:hover{
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn.apply{
+  background-color: #007bff;
+  border-color: #007bff;
+  padding: 12px 20px;
+  font-size: 1.1rem;
+  border-radius: 5px;
+  text-transform: uppercase;
+  transition: background-color 0.3s ease;
+}
+
+.btn.apply:hover{
+  background-color: #218838;
+  border-color: #1e7e34;
 }
 
 .card-body {
   padding: 1.5rem;
 }
 
+.card-text{
+  font-size: 1rem;
+  color: #555;
+  line-height: 1.5;
+  text-align: justify;
+}
+
 .card-title {
   font-size: 1.25rem;
 }
 
-.btn {
-  font-size: 0.875rem;
+.btn.cv {
+  background-color: #007bff;
+  border-color: #007bff;
+  box-shadow: 0 4px 6px rgba(0, 123, 255, 0.3);
+  transition: all 0,3s ease;
+}
+
+.btn.cv:hover{
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+.profile-card{
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: 20px;
 }
 
 .profile-photo {
-  height: 200px;
+  border-radius: 50%;
+  border: 3px solid #f0f0f0;
+  width: 120px;
+  height: 120px;
   object-fit: cover;
+  margin-bottom: 15px;
 }
 
 .category-item {
   text-align: center;
-  cursor: pointer;
+  border: 2px solid #ddd;
+  padding: 15px;
+  border-radius: 100px; /* Tarjetas más redondeadas */
+  /*transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;*/
 }
 
-.category-item .category-icon {
+.category-icon:hover{
+  transform: scale(1.05);
+  box-shadow: 0 8px 16px rgb(0, 0, 0, 0.2);
+  background-color: #f1f1f1;
+}
+
+.category-icon {
   font-size: 2rem;
   color: #007bff;
-  border: 2px solid #007bff;
-  width: 100px;
-  height: 100px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 10px;
-  border-radius: 50%; /* círculo */
+  transition: color 0.3s ease;
 }
 
-.category-item .subcategory-list {
-  margin-top: 10px;
-}
-
-.subcategory-link {
-  color: #007bff;
+.category-link {
   cursor: pointer;
-  text-decoration: none;
-  font-weight: bold;
-  display: block;
-  padding: 8px;
-  transition: all 0.3s ease;
 }
 
-.subcategory-link:hover {
-  text-decoration: underline;
-  background-color: #f0f8ff;
-}
-
-.category-item .category-link:hover {
-  opacity: 0.7;
-}
-
-.subcategory-link:active {
+.category-icon:hover {
   color: #0056b3;
+}
+
+.btn.prevOffer:disabled{
+  background-color: #ccc;
 }
 
 </style>
