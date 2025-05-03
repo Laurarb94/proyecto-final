@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\ApplicationRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ApplicationRepository::class)]
 class Application
@@ -24,6 +25,7 @@ class Application
     //Muchos a uno: muchas aplicaciones pueden pertener a un usuario
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy:'applications')]
     #[ORM\JoinColumn(nullable:false)]
+    #[Groups(["application_read"])]
     private ?User $user = null;
 
 

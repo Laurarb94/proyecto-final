@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Form\Extension\Core\DataTransformer\StringToFloatTransformer;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
@@ -65,6 +66,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     //------------------Relación usuarios y ofertas de trabajo, a través de aplication-----------------------------------------------
     //Relación uno a muchos con Aplicar: un usuario puede aplicar a muchas ofertas de trabajo
     #[ORM\OneToMany(mappedBy:'user', targetEntity: Application::class)]
+    #[Groups(["user_read"])] //grupo que define las propiedades que se deben serailizar
     private Collection $applications;
 
     //-------------------Relación usuarios y cursos---------------------------------------------------------------------------------

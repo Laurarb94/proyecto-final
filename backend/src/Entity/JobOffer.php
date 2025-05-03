@@ -10,6 +10,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: JobOfferRepository::class)]
 class JobOffer
@@ -38,6 +39,7 @@ class JobOffer
     //----------------------------Relación ofertas de trabajo y usuario, a través de aplicación------------------------------------
     //Relación uno a muchos con aplicar: Una oferta de trabajo puede tener muchas aplicaciones de usuario
     #[ORM\OneToMany(mappedBy:'jobOffer', targetEntity: Application::class)]
+    #[Groups(["job_offer_read"])]
     private Collection $applications;
 
     //-----------------------------Relación de oferta de empleo con usuario para saber el usuario que ha publicado la oferta---------
