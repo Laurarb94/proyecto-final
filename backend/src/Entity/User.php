@@ -299,7 +299,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function removeCourse(Course $course): self
     {
-        $this->courses->removeElement($course);
+        if ($this->courses->contains($course)) {
+            $this->courses->removeElement($course);
+            $course->removeStudent($this); // elimina también del otro lado
+        }
+    
         return $this;
     }
 

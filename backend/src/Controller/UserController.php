@@ -3,7 +3,9 @@
 namespace App\Controller;
 
 use App\Entity\User;
-
+use App\Repository\CourseRepository;
+use App\Repository\UserRepository;
+use ContainerH34GUZX\getApiPlatform_JsonSchema_BackwardCompatibleSchemaFactoryService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -223,17 +225,39 @@ final class UserController extends AbstractController{
     }
 
 
-    /*
-    //Métodos para añadie para el perfil del usuario
+    /*----------------------------Método para inscribirse y desisncribrise a un curso. Está en este controller porque
+    la acción recae sobre el usuario!!..------------------------- */
+    #[Route('api/user/{userId}/courses/{courseId}', name: 'user_add_course', methods: ['POST'])]
+    public function addCourseToUser(int $userId, int $courseId, EntityManagerInterface $em, UserRepository $userRepo, CourseRepository $courseRepo ): JsonResponse
+    {
+        $user = $userRepo->find($userId);
+        $course = $courseRepo->find($courseId);
 
-    //Obtener ofertas de emplo del usuario
-    
-    //Mostrar foto de perfil del usuario
+        if(!$user || !$course){
+            return new JsonResponse(['message' => 'User o curso no encontrado'], 404);
+        }
 
-    //Cambio de fotos de perfil y cambio de contraseña
-   
+        $user->addCourse($course);
+        $em->flush();
 
-*/
+        return new JsonResponse(['message'=>'Curso añadido al usuario']);
+    }
+
+    #[Route('api/user/{userId}/courses/{courseId}', name: 'user_remove_course', methods: ['DELETE'])]
+    public function removeCourseFromUser(int $userId, int $courseId, EntityManagerInterface $em, UserRepository $userRepo, CourseRepository $courseRepo): JsonResponse
+    {
+        $user = $userRepo->find($userId);
+        $course = $courseRepo->find($courseId);
+
+        if(!$user || !$course){
+            return new JsonResponse(['message' => 'User o curso no encontrado'], 404);
+        }
+
+        $user->removeCourse($course);
+        $em->flush();
+
+        return new JsonResponse(['message' => 'Curso eliminado del usuario']);
+    }
 
 
 
