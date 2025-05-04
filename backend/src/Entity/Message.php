@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\MessageRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: MessageRepository::class)]
 class Message
@@ -23,10 +24,12 @@ class Message
     //Relación con user
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy:'sentMessages')]
     #[ORM\JoinColumn(nullable:false)]
+    #[Groups(['message:read'])]
     private ?User $sender = null;
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy:'receivedMessages')]
     #[ORM\JoinColumn(nullable:false)]
+    #[Groups(['message:read'])]
     private ?User $receiver = null;
 
     public function getId(): ?int

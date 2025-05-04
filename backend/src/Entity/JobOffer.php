@@ -45,6 +45,7 @@ class JobOffer
     //-----------------------------Relación de oferta de empleo con usuario para saber el usuario que ha publicado la oferta---------
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'jobOffers')]
     #[ORM\JoinColumn(nullable: true)]
+    #[Groups(['job_offer:read'])]
     private ?User $company = null;
 
     #[ORM\ManyToOne(targetEntity: Category::class, inversedBy: 'jobOffers')]
