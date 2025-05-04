@@ -118,120 +118,119 @@ const handleFileChange = (field, event) =>{
 </script>
 
 <template>
-      <div class="container mt-5">
-    <h2>Formulario de Registro</h2>
+<div class="container mt-5 d-flex justify-content-center align-items-center min-vh-100">
+  <div class="card shadow-sm p-4 w-100">
+    <h2 class="text-center mb-4">Formulario de registro</h2>
 
-    <!-- PAso 1 -->
-    <div v-if="step === 1" class="card shadow-sm mb-4">
-      <div class="card-header">
-        <h4>Datos de Cuenta</h4>
-      </div>
+    <!--Paso1. Datos de cuenta-->
+    <div v-if="step === 1">
+      <div class="card-header text-center">Datos de Cuenta</div>
       <div class="card-body">
         <form @submit.prevent="nextStep">
           <div class="mb-3">
-            <label for="email" class="form-label">Email</label>
-            <input v-model="user.email" type="email" id="email" class="form-control" required />
-          </div>
+              <label for="email" class="form-label">Email</label>
+              <input v-model="user.email" type="email" id="email" class="form-control" required />
+            </div>
 
-          <div class="mb-3">
-            <label for="password" class="form-label">Contraseña</label>
-            <input v-model="user.password" type="password" id="password" class="form-control" required />
-          </div>
+            <div class="mb-3">
+              <label for="password" class="form-label">Contraseña</label>
+              <input v-model="user.password" type="password" id="password" class="form-control" required />
+            </div>
 
-          <div class="d-flex justify-content-between">
-            <button type="button" class="btn btn-secondary" @click="cancelEdit">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Siguiente</button>
-          </div>
+            <div class="d-flex justify-content-between">
+              <button type="button" class="btn btn-secondary" @click="cancelEdit">Cancelar</button>
+              <button type="submit" class="btn btn-primary">Siguiente</button>
+            </div>
         </form>
       </div>
     </div>
 
-    <!-- Paso 2 -->
-    <div v-if="step === 2" class="card shadow-sm mb-4">
-      <div class="card-header">
-        <h4>Datos Personales</h4>
+    <!--Paso 2. Datos personales-->
+    <div v-if="step === 2">
+        <div class="card-header text-center">Datos Personales</div>
+        <div class="card-body">
+          <form @submit.prevent="nextStep">
+            <div class="mb-3">
+              <label for="name" class="form-label">Nombre</label>
+              <input v-model="user.name" type="text" id="name" class="form-control" required />
+            </div>
+
+            <div class="mb-3">
+              <label for="last_name1" class="form-label">Primer Apellido</label>
+              <input v-model="user.last_name1" type="text" id="last_name1" class="form-control" required />
+            </div>
+
+            <div class="mb-3">
+              <label for="last_name2" class="form-label">Segundo Apellido</label>
+              <input v-model="user.last_name2" type="text" id="last_name2" class="form-control" required />
+            </div>
+
+            <div class="mb-3">
+              <label for="phone" class="form-label">Teléfono</label>
+              <input v-model="user.phone" type="text" id="phone" class="form-control" required />
+            </div>
+
+            <div class="mb-3">
+              <label for="country" class="form-label">País</label>
+              <input v-model="user.country" type="text" id="country" class="form-control" required />
+            </div>
+
+            <div class="mb-3">
+              <label for="city" class="form-label">Ciudad</label>
+              <input v-model="user.city" type="text" id="city" class="form-control" required />
+            </div>
+
+            <div class="mb-3">
+              <label for="biography" class="form-label">Biografía</label>
+              <textarea v-model="user.biography" id="biography" class="form-control" rows="3"></textarea>
+            </div>
+
+            <div class="d-flex justify-content-between">
+              <button type="button" class="btn btn-secondary" @click="prevStep">Volver</button>
+              <button type="submit" class="btn btn-primary">Siguiente</button>
+            </div>
+          </form>
+        </div>
       </div>
-      <div class="card-body">
-        <form @submit.prevent="nextStep">
-          <div class="mb-3">
-            <label for="name" class="form-label">Nombre</label>
-            <input v-model="user.name" type="text" id="name" class="form-control" required />
-          </div>
 
-          <div class="mb-3">
-            <label for="last_name1" class="form-label">Primer Apellido</label>
-            <input v-model="user.last_name1" type="text" id="last_name1" class="form-control" required />
-          </div>
+      <!--Paso 3. Subir foto y cv-->
+      <div v-if="step === 3">
+        <div class="card-header text-center">Subir foto y CV</div>
+        <div class="card-body">
+          <form @submit.prevent="handleRegister">
+            <div class="mb-3">
+              <label for="photo" class="form-label">Foto de Perfil</label>
+              <input type="file" id="photo" class="form-control" @change="handleFileChange('photo', $event)" />
+            </div>
 
-          <div class="mb-3">
-            <label for="last_name2" class="form-label">Segundo Apellido</label>
-            <input v-model="user.last_name2" type="text" id="last_name2" class="form-control" required />
-          </div>
+            <div class="mb-3">
+              <label for="cv" class="form-label">Currículum Vitae (PDF)</label>
+              <input type="file" id="cv" class="form-control" @change="handleFileChange('cv', $event)" />
+            </div>
 
-          <div class="mb-3">
-            <label for="phone" class="form-label">Teléfono</label>
-            <input v-model="user.phone" type="number" id="phone" class="form-control" required />
-          </div>
-
-          <div class="mb-3">
-            <label for="country" class="form-label">País</label>
-            <input v-model="user.country" type="text" id="country" class="form-control" required />
-          </div>
-
-          <div class="mb-3">
-            <label for="city" class="form-label">Ciudad</label>
-            <input v-model="user.city" type="text" id="city" class="form-control" required />
-          </div>
-
-          <div class="mb-3">
-            <label for="biography" class="form-label">Biografía</label>
-            <textarea v-model="user.biography" type="text" id="biography" class="form-control" rows="3"></textarea>
-          </div>
-
-          <div class="d-flex justify-content-between">
-            <button type="button" class="btn btn-secondary" @click="prevStep">Volver</button>
-            <button type="submit" class="btn btn-primary">Siguiente</button>
-          </div>
-        </form>
+            <div class="d-flex justify-content-between">
+              <button type="button" class="btn btn-secondary" @click="prevStep">Volver</button>
+              <button type="submit" class="btn btn-primary">Registrarse</button>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
-
-    <!-- Paso 3-->
-    <div v-if="step === 3" class="card shadow-sm mb-4">
-      <div class="card-header">
-        <h4>Subir Foto y CV</h4>
-      </div>
-      <div class="card-body">
-        <form @submit.prevent="handleRegister">
-          <div class="mb-3">
-            <label for="photo" class="form-label">Foto de Perfil</label>
-            <input type="file" id="photo" class="form-control" @change="handleFileChange('photo', $event)" />
-          </div>
-
-          <div class="mb-3">
-            <label for="cv" class="form-label">Currículum Vitae (PDF)</label>
-            <input type="file" id="cv" class="form-control" @change="handleFileChange('cv', $event)" />
-          </div>
-
-          <div class="d-flex justify-content-between">
-            <button type="button" class="btn btn-secondary" @click="prevStep">Volver</button>
-            <button type="submit" class="btn btn-primary">Registrarse</button>
-          </div>
-        </form>
-      </div>
-    </div>
   </div>
+</div>
+
 </template>
 
 <style scoped>
-.card {
+.card{
+  max-width: 600px;
   border-radius: 12px;
   transition: all 0.3s ease;
+  background-color: #fff;
 }
 
 
 .card-header {
-  background-color: #f7f7f7;
+  background-color: #fff;
   border-bottom: 2px solid #ddd;
   text-align: center;
   font-weight: bold;
@@ -239,6 +238,7 @@ const handleFileChange = (field, event) =>{
 }
 
 .card-body {
+  background-color: #fff;
   padding: 20px;
 }
 
@@ -253,4 +253,5 @@ button:focus {
 form {
   padding: 10px;
 }
+
 </style>

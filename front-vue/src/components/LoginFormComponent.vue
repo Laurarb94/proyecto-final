@@ -65,26 +65,87 @@ export default {
 </script>
 
 <template>
-  <div class="container mt-4">
-      <h2>Loguéate</h2>
+  <div class="container d-flex flex-column min-vh-100">
+      <h2 class="mt-4 text-center mx-auto">Loguéate</h2>
+     
       <!--Si viene del registro, mostrar mensaje para terminar de registrarse-->
-      <div v-if="fromRegistration" class="alert alert-info">
+      <div v-if="fromRegistration" class="alert alert-info text-center">
         <strong>¡Bienvenido/a!</strong>Para finalizar tu registro, por favor inicia sesión.
       </div>
-    <div>
-      <form @submit.prevent="handleLogin" class="bg-lught p-4 rounded shadow">
-        <div class="mb-3">
-          <input v-model="email" type="email" placeholder="Email" class="form-control" required />
-        </div>
 
-        <div class="mb-3">
-          <input v-model="password" type="password" placeholder="Password" class="form-control" required />
-        </div>
+    <div class="d-flex justify-content-center flex-grow-1">
+      <div class="card shadow-sm p-4">
 
-        <button type="submit" class="btn btn-primary">Login</button>
-      </form>
+        <form @submit.prevent="handleLogin">
+          <div class="mb-3">
+            <input v-model="email" type="email" placeholder="Email" class="form-control" required />
+          </div>
 
-      <p v-if="errorMessage">{{ errorMessage }}</p>
+          <div class="mb-3">
+            <input v-model="password" type="password" placeholder="Password" class="form-control" required />
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100">Login</button>
+        
+        </form>
+
+        <p v-if="errorMessage" class="text-danger mt-3">{{ errorMessage }}</p>
+      
+      </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.card{
+  max-width: 400px;
+  width: 100%;
+  height: 300%;
+  margin-top: 5%;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  background-color: #fff;
+}
+
+.card-header {
+  background-color: #fff;
+  border-bottom: 2px solid #ddd;
+  text-align: center;
+  font-weight: bold;
+  padding: 15px;
+}
+
+.card input{
+  border-radius: 5px;
+}
+
+.card button{
+  border-radius: 5px;
+  font-weight: 600;
+}
+
+.card p{
+  font-size: 0.9rem;
+  color: #666
+}
+
+.alert-info {
+  background-color: #e7f3fe;
+  color: #084298;
+  border: 1px solid #b6e0fe;
+}
+
+button {
+  width: 48%;
+}
+
+button:focus {
+  outline: none;
+}
+
+form {
+  padding: 10px;
+}
+
+
+</style>
