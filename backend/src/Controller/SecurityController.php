@@ -92,12 +92,14 @@ final class SecurityController extends AbstractController
 
     }
     
+    /*
     #[Route('/api/logout', name: 'api_logout', methods: ['POST'])]
     public function apiLogout(): JsonResponse
     {
         $this->logger->info('Logout called');
         return new JsonResponse([ 'message' => 'Logout exitoso'], JsonResponse::HTTP_OK);
     }
+        */
 
 
 

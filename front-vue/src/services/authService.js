@@ -23,6 +23,16 @@ export const loginUser = async(email, password) =>{
 };
 
 //Hacer el logout
+export const logoutUser = () => {
+  //Eliminar token y usuario del localStorage:
+  localStorage.removeItem("id");
+  localStorage.removeItem("token");
+
+  console.log("Logout local exitoso");
+}
+
+
+/*
 export const logoutUser = async () =>{
   try{
     //Obtener el token almacenado en el localStorage
@@ -54,6 +64,7 @@ export const logoutUser = async () =>{
   }catch(error){
     console.log("Error al hacer el logout: ", error.response ? error.response.data : error.message);
   }
-}
 
+}
+*/
 
