@@ -3,6 +3,7 @@ import { registerUser } from '@/services/userService';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import Swal from 'sweetalert2';
+import { useAuth } from '@/composables/useAuth';
 
 //Definir al usuario como un objeto reactivo
 const user = ref({
@@ -63,6 +64,10 @@ const handleRegister = async() => {
 
         const response = await registerUser(formData);
         console.log("Respuesta completa del backend: ", response);
+
+        //Usar composable useAuth para actualizar estado global
+        const { login } = useAuth();
+        login(response.id, response.token); //Establecer estado global con el id y token
 
         await Swal.fire({
             title: '¡Registro exitoso!',

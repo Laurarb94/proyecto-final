@@ -2,8 +2,19 @@
 import { ref, onMounted, onUnmounted} from 'vue';
 import { useRouter } from 'vue-router';
 import LogoutButtonComponent from './components/LogoutButtonComponent.vue';
+import { useAuth } from './composables/useAuth';
 
-// Verifica si el usuario está logueado
+const { isAuthenticated, logout} = useAuth();
+const router = useRouter();
+
+const handleLogout = () => {
+  logout();
+  router.push('/');
+}
+
+
+
+/* Verifica si el usuario está logueado
 const user = ref(localStorage.getItem('userId'));  // Si el 'userId' está en localStorage, el usuario está autenticado
 const router = useRouter();
 
@@ -27,6 +38,7 @@ const logout = () => {
   user.value = null;  // El usuario ya no está logueado
   router.push('/');  // Redirigir al inicio después de cerrar sesión
 };
+*/
 
 </script>
 
@@ -42,14 +54,14 @@ const logout = () => {
 
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav ms-auto">
-            <li class="nav-item" v-if="!user">
+            <li class="nav-item" v-if="!isAuthenticated">
               <RouterLink to="/api/login" class="nav-link">Log in</RouterLink>
             </li>
-            <li class="nav-item" v-if="!user">
+            <li class="nav-item" v-if="!isAuthenticated">
               <RouterLink to="/registerUser" class="nav-link">Regístrate</RouterLink>
             </li>
-            <li class="nav-item" v-if="user">
-              <LogoutButtonComponent />
+            <li class="nav-item" v-if="isAuthenticated">
+              <button @click="handleLogout" class="btn btn-link nav-link">Cerrar sesión</button>
             </li>
           </ul>
         </div>
