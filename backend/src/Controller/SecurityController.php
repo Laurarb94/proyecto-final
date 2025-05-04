@@ -68,7 +68,7 @@ final class SecurityController extends AbstractController
             //construyes el token
 
             try{
-                $jwt = JWT::encode($payload, $_ENV['JWT_SECRET'], 'HS512');
+                $jwt = JWT::encode($payload, $_ENV['JWT_SECRET_KEY'], 'HS512');
             }catch(\Exception $e){
                 return $this->json([
                     'estado'=>'error',
