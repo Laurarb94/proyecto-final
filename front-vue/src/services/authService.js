@@ -29,42 +29,5 @@ export const logoutUser = () => {
   localStorage.removeItem("token");
 
   console.log("Logout local exitoso");
-}
-
-
-/*
-export const logoutUser = async () =>{
-  try{
-    //Obtener el token almacenado en el localStorage
-    const token = localStorage.getItem("token");
-
-    //Ver si el token está disponible antes de enviar la solicidtud
-    if(!token){
-      throw new Error("No se encontró el token de autenticación");
-    }
-
-    console.log("Token enviado:", token);  // Asegúrate de que el token esté en el localStorage
-
-
-    //haces solicitud post al endpoint del logout
-    const response = await axios.post(API_URL_LOGOUT, {}, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-
-    console.log("Logout exitoso", response.data);
-
-    //Eliminar el token y el usuario de localStorage:
-    localStorage.removeItem("id");
-    localStorage.removeItem("token");
-
-    return response.data;
-
-  }catch(error){
-    console.log("Error al hacer el logout: ", error.response ? error.response.data : error.message);
-  }
-
-}
-*/
+};
 

@@ -11,46 +11,63 @@ use Symfony\Component\Form\Extension\Core\DataTransformer\StringToFloatTransform
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
+use ApiPlatform\Metadata\ApiResource;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
+#[ApiResource(
+    normalizationContext: ['groups' => ['user:read']],
+    denormalizationContext: ['groups' => ['user:write']]
+)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['user:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['user:read', 'user:write', 'application:read', 'job_offer:read', 'message:read', 'course:read'])]
     private ?string $name = null;
 
+    #[Groups(['user:read', 'user:write', 'application:read', 'job_offer:read', 'message:read', 'course:read'])]
     #[ORM\Column(length: 255)]
     private ?string $lastName1 = null;
 
+    #[Groups(['user:read', 'user:write', 'application:read', 'job_offer:read', 'message:read', 'course:read'])]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $lastName2 = null;
 
+    #[Groups(['user:read', 'user:write', 'application:read', 'job_offer:read', 'message:read', 'course:read'])]
     #[ORM\Column(length: 255)]
     private ?string $email = null;
 
+    #[Groups(['user:write'])] //no se expone en lectura
     #[ORM\Column(length: 255)]
     private ?string $password = null;
 
     #[ORM\Column(type: "json")]
+    #[Groups(['user:read', 'user:write', 'application:read', 'job_offer:read', 'message:read', 'course:read'])]
     private array $roles = [];
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['user:read', 'user:write', 'application:read', 'job_offer:read', 'message:read', 'course:read'])]
     private ?string $country = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['user:read', 'user:write', 'application:read', 'job_offer:read', 'message:read', 'course:read'])]
     private ?string $city = null;
 
     #[ORM\Column]
+    #[Groups(['user:read', 'user:write', 'application:read', 'job_offer:read', 'message:read', 'course:read'])]
     private ?int $phone = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['user:read', 'user:write', 'application:read', 'job_offer:read', 'message:read', 'course:read'])]
     private ?string $photo = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['user:read', 'user:write', 'application:read', 'job_offer:read', 'message:read', 'course:read'])]
     private ?string $biography = null;
 
 
@@ -58,27 +75,33 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     // Relación uno a muchos: un usuario puede enviar muchos mensajes, y un mensaje sólo puede tener un remitente y un destinataorio
 
     #[ORM\OneToMany(mappedBy:'sender', targetEntity: Message::class, orphanRemoval:true)] //orphanRemoval para que cuando borres un mensaje de la colección se borre de la bbdd también
+    #[Groups(['user:read'])]
     private Collection $sentMessages;
 
     #[ORM\OneToMany(mappedBy: 'receiver', targetEntity: Message::class, orphanRemoval: true)]
+    #[Groups(['user:read'])]
     private Collection $receivedMessages;
 
     //------------------Relación usuarios y ofertas de trabajo, a través de aplication-----------------------------------------------
     //Relación uno a muchos con Aplicar: un usuario puede aplicar a muchas ofertas de trabajo
     #[ORM\OneToMany(mappedBy:'user', targetEntity: Application::class)]
-    #[Groups(["user_read"])] //grupo que define las propiedades que se deben serailizar
+    //#[Groups(["user_read"])] //grupo que define las propiedades que se deben serailizar
+    #[Groups(['user:read'])]
     private Collection $applications;
 
     //-------------------Relación usuarios y cursos---------------------------------------------------------------------------------
     //Relación muchos a muchos: un usuario puede inscribirse en muchos cursos y un curso puede tener muchos alumnos
     #[ORM\ManyToMany(targetEntity: Course::class, inversedBy:'students')]
+    #[Groups(['user:read'])]
     private Collection $courses;
 
     #[ORM\Column(type: 'string', length: 255, nullable: 'true')]
+    #[Groups(['user:read', 'user:write'])]
     private ?string $cv = null;
 
     //-------------Relación con oefrtas de empleo para obtener las ofertas que haya publicaod el usuario------------------
     #[ORM\OneToMany(mappedBy: 'company', targetEntity: JobOffer::class)]
+    #[Groups(['user:read'])]
     private Collection $jobOffers;
 
 

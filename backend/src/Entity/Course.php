@@ -7,6 +7,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: CourseRepository::class)]
 class Course
@@ -25,6 +26,7 @@ class Course
     //---------------Relación con usuarios---------------------
     //Relación muchos a muchos: un usuario puede inscribirse en muchos cursos y un curso puede tener muchos alumnos
     #[ORM\ManyToMany(targetEntity: User::class, mappedBy:'courses')]
+    #[Groups(['course:read'])]
     private Collection $students; 
 
     

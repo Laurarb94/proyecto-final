@@ -25,7 +25,8 @@ class Application
     //Muchos a uno: muchas aplicaciones pueden pertener a un usuario
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy:'applications')]
     #[ORM\JoinColumn(nullable:false)]
-    #[Groups(["application_read"])]
+    //#[Groups(["application_read"])]
+    #[Groups(["application:read"])]
     private ?User $user = null;
 
 

@@ -13,8 +13,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Serializer\SerializerInterface;
 
 
 final class UserController extends AbstractController{
@@ -29,10 +29,13 @@ final class UserController extends AbstractController{
     //-------------------------------------------Listar usuarios--------------------------------------------------------------------------------
 
     #[Route('/api/user', name: 'user_list', methods:['GET'])]
-    public function list(): Response
+    public function list(SerializerInterface $serializer): Response
     {
         $users = $this->em->getRepository(User::class)->findAll();
-        return $this->json($users, Response::HTTP_OK);
+        $data = $serializer->serialize($users, 'json', ['groups' => ['user:read']]);
+        
+        return new JsonResponse($data, Response::HTTP_OK, [], true);
+        
     }
     
     //----------------------------------------Obtener usuario por su id---------------------------------------------------------------------------
