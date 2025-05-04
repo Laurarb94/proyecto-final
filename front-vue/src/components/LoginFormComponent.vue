@@ -1,4 +1,5 @@
 <script>
+import { useAuth } from '@/composables/useAuth';
 import { loginUser } from '../services/authService'; // Importa el servicio
 
 export default {
@@ -17,6 +18,7 @@ export default {
       this.fromRegistration = true;
     }
   },
+
   methods: {
     async handleLogin() {
       if(!this.email || !this.password){
@@ -29,14 +31,17 @@ export default {
         const response = await loginUser(this.email, this.password);
         console.log("Login exitoso:", response);
 
-        localStorage.setItem('userId', response.id);
+        //Usar el composable useAuth para actualizar el estado global
+        const { login } = useAuth();
+        login(response.id, response.token); //establecer estado global con el id y el token
+
+        //localStorage.setItem('userId', response.id);
         //localStorage.setItem('token', response.jwt); //guardas el token (en el controlador en symfpony al token le has llamado jwt) para poder controlar rutas y quién entra y quién no
 
         //guardar el token en localStorage
-        localStorage.setItem('token', response.token);
+        //localStorage.setItem('token', response.token);
 
         //Decodificar el token JWT para obtener los datos del usuario
-        //const tokenPayLoad = JSON.parse(atob(response.jwt.split('.')[1]));
         const tokenPayLoad = JSON.parse(atob(response.token.split('.')[1]));
         console.log('Token Payload: ', tokenPayLoad);
 
@@ -48,6 +53,8 @@ export default {
           this.$router.push('/dashboardUser');
         }else if(userRole === 'ROLE_COMPANY'){
           this.$router.push('/dashboardCompany');
+        }else if(userRole === 'ROLE_ADMIN'){
+          this.$router.push('/users');
         }else{
           //manejar casos de error
           console.log('Error: rol desconocido');
