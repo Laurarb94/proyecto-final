@@ -3,7 +3,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import LogoutButtonComponent from './components/LogoutButtonComponent.vue';
 
-// Verifica si el usuario está logueado (por ejemplo, usando localStorage)
+// Verifica si el usuario está logueado
 const user = ref(localStorage.getItem('userId'));  // Si el 'userId' está en localStorage, el usuario está autenticado
 const router = useRouter();
 
@@ -18,59 +18,78 @@ const logout = () => {
 
 <template>
   <div>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
       <div class="container">
-        <ul class="navbar-nav d-flex flex-row">
-          <!--Si el usuario no está logueado-->
-          <li class="nav-item">
-            <RouterLink v-if="!user" to="#" class="nav-link">Quiénes somos</RouterLink>
-          </li>
-          <li class="nav-item">
-            <RouterLink v-if="!user" to="#" class="nav-link">Por qué elegirnos</RouterLink>
-          </li>
-          <li class="nav-item">
-            <RouterLink v-if="!user" to="#" class="nav-link">Contáctanos</RouterLink>
-          </li>
+        <RouterLink to="/" class="navbar-brand">Mi empleo</RouterLink>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
 
-          <!--Si el usuario está logueado-->
-          <li class="nav-item">
-            <RouterLink v-if="user" to="#" class="nav-link">Mensajes</RouterLink>
-          </li>
-          <li class="nav-item">
-            <RouterLink v-if="user" to="#" class="nav-link">Cursos</RouterLink>
-          </li>
-          <li class="nav-item">
-            <RouterLink v-if="user" to="#" class="nav-link">Ajustes</RouterLink>
-          </li>
-        </ul>
-
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item">
-            <!--Mostrar login si no hay usuario logueado, y logout si el usuario está logueado-->
-            <RouterLink v-if="!user" to="/api/login" class="nav-link">Log in</RouterLink>
-            <LogoutButtonComponent v-if="user" /> 
-          </li>
-          <li class="nav-item">
-            <!--Mostrar registrarse si no hay usuario logueado-->
-            <RouterLink v-if="!user" to="/registerUser" class="nav-link">Regístrate</RouterLink>
-            <RouterLink v-if="!user" to="/registerCompany">¿Eres una empresa? Regístrate aquí</RouterLink>
-          </li>
-        </ul>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item" v-if="!user">
+              <RouterLink to="/api/login" class="nav-link">Log in</RouterLink>
+            </li>
+            <li class="nav-item" v-if="!user">
+              <RouterLink to="/registerUser" class="nav-link">Regístrate</RouterLink>
+            </li>
+            <li class="nav-item" v-if="user">
+              <LogoutButtonComponent />
+            </li>
+          </ul>
+        </div>
       </div>
     </nav>
 
+    <!-- Página Principal (HomeView) -->
     <RouterView />
 
-    <!--
-    <footer class="bg-dark text-white text-center py-3 mt-4">
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-4 mt-5">
       <p>© 2025 Mi TFG - Todos los derechos reservados</p>
-
     </footer>
-  -->
-
+    
   </div>
+
 </template>
 
 <style scoped>
+body {
+  background-color: #f4f7fa;
+  color: #2c3e50;
+  font-family: 'Roboto', sans-serif;
+}
+
+
+.navbar{
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.navbar-nav .nav-link{
+  color: #333;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover{
+  color: #0056b3;
+}
+
+.navbar-brand{
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #007bff;
+}
+
+footer{
+  background-color: #343a40;
+  color: white;
+  text-align: center;
+  padding: 20px 0;
+}
+
+
 
 </style>
