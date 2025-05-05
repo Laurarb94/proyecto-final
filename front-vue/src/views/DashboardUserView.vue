@@ -1,14 +1,27 @@
 <script>
 import { logoutUser } from '@/services/authService';
 import { getUserById } from '@/services/userService';
+import { useAuth } from '@/composables/useAuth';
 import jobOfferService from '@/services/jobOfferService';
 import categoryService from '@/services/categoryService';
+import UserComponent from '@/components/UserComponent.vue';
+import ProfileCardComponent from '@/components/ProfileCardComponent.vue';
+import CategoryFilterComponent from '@/components/CategoryFilterComponent.vue';
+import AppliedOffersComponent from '@/components/AppliedOffersComponent.vue';
 import applicationService from '@/services/applicationService';
 import Swal from 'sweetalert2';
-import { onBeforeRouteLeave } from 'vue-router';
+import OfferListComponent from '@/components/OfferListComponent.vue';
 
 export default {
   name: 'DashboardUserView',
+
+  components: {
+    UserComponent,
+    AppliedOffersComponent,
+    CategoryFilterComponent,
+    OfferListComponent,
+    ProfileCardComponent
+  },
 
   props: {
     offer: Object, 
@@ -20,20 +33,10 @@ export default {
       offers: [], 
       categories: [],
       subcategories: [],
-      selectedCategoryId: null,
-      selectedSubcategoryId: null,
       appliedOffers: [], //aquí se guardarán las ofertas en las que se postule el usuario
       successMessage: '',
-      categoryIcons: {
-        'Informática': 'laptop',
-        'Salud': 'staff-snake',
-        'Marketing': 'lightbulb',
-        'Ciencias Sociales': 'graduation-cap',
-        'Humanidades': 'book',
-        'Hosteleria y Turismo': 'utensils',
-        'Matemáticas y Estadística':'diagram-project',
-        'Ingenierias': 'tools',
-      },
+      selectedSubcategory: null,
+      filteredOffers: [],
       userId: null,
       currentOfferIndex: 0, //lleva el control de la oferta que estás viendo, para luego que el usuario pueda ir cambiándolas
     };
@@ -42,6 +45,14 @@ export default {
   created(){
     this.fetchUserData(); //llamas a la función para que te devuleva los datos del usuario
     this.fetchCategories();
+    this.fetchOffers(); 
+  },
+
+  computed: {
+      isAdmin() {
+        const role = localStorage.getItem('userRole'); //acceder al rol almacenado
+        return role === 'ROLE_ADMIN';
+      }
   },
 
   methods: {
@@ -79,87 +90,36 @@ export default {
       }
      },
 
-    async fetchSubcategories() {
-      const category = this.categories.find(cat => cat.id === parseInt(this.selectedCategoryId));
-      //console.log("Categoría seleccionada:", JSON.stringify(category, null, 2));
-
-      if(category && Array.isArray(category.subcategories)){
-        this.subcategories = category.subcategories;
-      }else{
-        console.warn('Subcategorías no están en formato array, revisar backend o parseo');
-        this.subcategories = [];
+     async fetchOffers(){
+      try {
+        const response = await jobOfferService.getAll();
+        this.offers = response;
+      } catch (error) {
+        console.log('Error al obtener las ofertas: ', error);
       }
+     },
 
-      //console.log('Subcategorías (formato array de objetos):', this.subcategories);
+    selectSubcategory(subcategory){
+      this.selectedSubcategoryId = subcategory.id;
+      this.fetchFilteredOffers();
     },
 
     async fetchFilteredOffers(){
-      if(!this.selectedSubcategoryId) return;
-
       try {
         const response = await jobOfferService.getAll();
-        
-        console.log('Ofertas obtenidas: ', response);
-
-        this.offers = response.filter(offer =>
-          offer.subcategory && offer.subcategory.id === parseInt(this.selectedSubcategoryId)
+        this.filteredOffers = response.filter(offer =>
+          offer.subcategory && offer.subcategory.id === this.selectedSubcategoryId
         );
-
-        console.log('Ofertas filtradas: ', this.offers);
-
       } catch (error) {
         console.log('Error al filtrar las ofertas: ', error);
-      }
-
-    },
-
-    selectedSubcategory(subcategoryId) {
-      this.selectedSubcategoryId = subcategoryId;
-    },
-
-    async apply(offerId){
-      try {
-        //console.log('USER ID: ', this.userId);
-        const response = await applicationService.applyToOffer(offerId, this.userId);
-        Swal.fire({
-          icon: 'success',
-          title: 'Postulación exitosa',
-          text: response.data.message,
-          confirmButtonText: 'Aceptar'
-        });
-
-        //Mover la oferta a "mis ofertas postuladas"
-        const appliedOffers = this.offers.find(offer => offer.id === offerId); 
-        if(appliedOffers){
-          this.appliedOffers.push(appliedOffers); //moverla a la lista de ofertas aplicadas
-          this.offers = this.offers.filter(offer => offer.id !== offerId); // Eliminarla de las ofertas disponibles
-          localStorage.setItem('appliedOffers', JSON.stringify(this.appliedOffers));
-        }
-
-      } catch (error) {
-        console.log('Error al aplicar: ', error);
-        if(error.response && error.response.data){
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: `Error del servidor: ${error.response.data.error || 'Error desconocido'}`,
-            confirmButtonText: 'Aceptar'
-          });
-        }else{
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Error al aplicar',
-            confirmButtonText: 'Aceptar'
-          });
-        }
       }
     },
 
     async fetchApplications(){
       try {
         const response = await applicationService.getUserApplications(this.userId);
-        this.appliedOffers = response.data; //guardar postulaciones en el estado local
+        console.log('Ofertas aplicadas: ', response.data);
+        this.appliedOffers = response.data || []; //guardar postulaciones en el estado local
 
         localStorage.setItem('appliedOffers', JSON.stringify(this.appliedOffers)); //guardar las posulaciones en el localStorage
 
@@ -168,45 +128,44 @@ export default {
       }
     },
 
-    getCategoryIconKey(categoryName){
-      const icon = this.categoryIcons[categoryName] || 'fa-question-circle'; //si no encuentra la categoría devuelve un icono por defecto
-      return icon;
+    handleApplyOffer(offerId){
+      const offerToApply = this.offers.find(offer=>offer.id === offerId);
+      if(offerToApply){
+        this.apply(offerId);
+      }
     },
 
-    async removeApplication(offerId){
-        // Mostrar un SweetAlert de confirmación antes de eliminar
-        const result = await Swal.fire({
-          title: '¿Estás seguro?',
-          text: 'Una vez eliminada, no podrás recuperar esta postulación.',
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonText: 'Sí, eliminar',
-          cancelButtonText: 'Cancelar',
-          reverseButtons: true,
+    async apply(offerId){
+      try {
+        const response = await applicationService.applyToOffer(offerId, this.userId);
+        Swal.fire({
+          icon: 'success',
+          title: 'Postulación exitosa',
+          text: response.data.message,
+          confirmButtonText: 'Aceptar',
         });
 
-        if (result.isConfirmed) {
-          try {
-            const response = await applicationService.deleteApplication(this.userId, offerId);
-            Swal.fire({
-              icon: 'success',
-              title: 'Postulación eliminada',
-              text: response.message,
-              confirmButtonText: 'Aceptar',
-            });
-
-            // Eliminar la oferta de la lista de ofertas postuladas localmente
-            this.appliedOffers = this.appliedOffers.filter(offer => offer.id !== offerId);
-
-          } catch (error) {
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: 'No se pudo eliminar la postulación',
-              confirmButtonText: 'Aceptar',
-            });
-          }
+        // Mover la oferta a "mis ofertas postuladas"
+        const appliedOffer = this.offers.find(offer => offer.id === offerId);
+        if (appliedOffer) {
+          this.appliedOffers.push(appliedOffer);
+          this.offers = this.offers.filter(offer => offer.id !== offerId);
+          localStorage.setItem('appliedOffers', JSON.stringify(this.appliedOffers));
         }
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Hubo un problema al postularte',
+          confirmButtonText: 'Aceptar',
+        });
+      }
+    },
+
+    prevOffer(){
+      if(this.currentOfferIndex > 0){
+        this.currentOfferIndex--;
+      }
     },
 
     nextOffer(){
@@ -215,10 +174,30 @@ export default {
       }
     },
 
-    prevOffer(){
-      if(this.currentOfferIndex > 0){
-        this.currentOfferIndex--;
+    async removeApplication(id){
+      const result = await Swal.fire({
+        title: '¿Estás seguro',
+        text: '¿Quieres cancelar tu postulación a esta oferta?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, cancelar',
+        cancelButtonText: 'No, mantener',
+        reverseButtons: true
+      });
+
+      if(result.isConfirmed){
+        this.appliedOffers = this.appliedOffers.filter(o => o.id !==id);
+          if(this.currentOfferIndex >= this.appliedOffers.length){
+            this.currentOfferIndex = Math.max(this.appliedOffers.length -1, 0);
+          }
+
+          Swal.fire(
+            'Postulación cancelada!',
+            'Te has desinscrito de la oferta correctamente',
+            'success'
+          );
       }
+
     },
 
     //Método para hacer el logout
@@ -242,158 +221,87 @@ export default {
 
   }, //cierre de los métodos
 
-  watch: {
-  selectedCategoryId(newVal){
-    this.fetchSubcategories();
-    this.selectedSubcategoryId = null;
-    console.log('Subcategorías: ', this.subcategories);
-    this.offers = [];
-  },
-  selectedSubcategoryId(newVal){
-    this.fetchFilteredOffers();
-  }
-}
-
-
-
 };
 
 
 </script>
 
 <template>
-  <div class="container my-4">
-    <!--Mensaje de éxito-->
-    <div v-if="successMessage" class="alert alert-success alert-dismissible fade show" role="alert">
-      {{ successMessage }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+<div class="container my-4">
+  <!--Mensaje de éxito-->
+  <div v-if="successMessage" class="alert alert-success alert-dismissible fade show" role="alert">
+    {{ successMessage }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+
+  <!--Admin-->
+  <div v-if="isAdmin">
+    <div class="card mb-4">
+      <div class="card-header bg-dark text-white">Administración de usuarios</div>
+      <div class="card-body">
+        <UserComponent />
+      </div>
+    </div>
+  </div>
+
+  <!--Perfil + Ofertas activas-->
+  <div class="row g-4">
+    <!-- Perfil -->
+    <div class="col-md-4">
+      <ProfileCardComponent :user="user" />
     </div>
 
-    <div class="row">
-      <!--Columna del perfil-->
-      <div class="col-md-4">
-        <div class="card">
-          <img v-if="user.photo" :src="`http://localhost:8000/uploads/profile_photos/${user.photo}`" alt="Foto de perfil" class="card-img-top profile-photo" />
-          <div class="card-body">
-            <h5 class="card-title"> Bienvenido/a, {{ user.name }}</h5>
-            <p class="card-text">Biografía: {{ user.biography }}</p>
-            <a v-if="user.cv" :href= "`http://localhost:8000/uploads/cvs/${user.cv}`" class="btn btn-primary cv" target="_blank">Ver CV</a>
-          </div>
-        </div>
+    <!-- Ofertas activas + Buscador -->
+    <div class="col-md-8">
+      <!-- Buscador en la parte superior de las ofertas -->
+      <div class="d-flex justify-content-center">
+        <CategoryFilterComponent
+          :categories="categories"
+          @subcategory-selected="selectSubcategory"
+          class="w-75"
+        />
       </div>
 
-      <!--Columna de ofertas-->
-      <div class="col-md-8">
-        <!--Filtro de categorías con iconos-->
-        <div class="card">
-          <div class="card-body">
-            <h5 class="card-title">Explora las categorías y encuentra tu trabajo ideal</h5>
-            <div class="row">
-              <div class="col-6 col-md-3" v-for="category in categories" :key="category.id">
-                <div class="category-item">
-                  <div class="category-link" @click="selectedCategoryId = selectedCategoryId === category.id ? null : category.id">
-                    <div class="category-icon mx-auto">
-                      <font-awesome-icon :icon="['fas', getCategoryIconKey(category.name)]" />
-                    </div>
-                    <p class="small mt-2 text-center">{{ category.name }}</p>
-                  </div>
-
-                  <div v-if="selectedCategoryId === category.id" class="subcategory-list mt-2">
-                    <div class="collapse show">
-                      <ul class="list-unstyled">
-                        <li v-for="subcategory in category.subcategories" :key="subcategory.id" @click="selectedSubcategory(subcategory.id)">
-                          <a href="#" class="subcategory-link">{{ subcategory.name }}</a>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div> <!--Cierre card-body-->
-        </div> <!--Cierre card-->
-
-        <!--Ofertas de trabajo-->
-        <h3 class="mt-4">Ofertas disponibles</h3>
-        <div class="row">
-          <div v-for="offer in offers" :key="offer.id" class="col-md-6 mb-4">
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title">{{ offer.title }}</h5>
-                <p class="card-text">{{ offer.description }}</p>
-                <p><strong>Ubicación:</strong> {{ offer.location }}</p>
-                <button class="btn btn-primary apply" @click="apply(offer.id)">Postularse</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!--Ofertas-->
-        <h3 class="mt-5">Mis ofertas postuladas</h3>
-        <div class="card mx-auto position-relative" style="max-width: 600px;"></div>
-        
-        <div v-if="appliedOffers.length > 0" class="position-relative" style="min-height: 200px;">
-          <span>{{ currentOfferIndex +1 }} de {{ appliedOffers.length }}</span>
-          <!--Botón izquierda-->
-          <button 
-            v-if="appliedOffers.length > 1"
-            class="btn btn-secondary prevOffer position-absolute top-50 start-0 translate-middle-y"
-            @click="prevOffer"
-            :disabled="currentOfferIndex === 0">
-            <font-awesome-icon :icon="['fas', 'chevron-left']" />
-          </button>
-          
-          <!--Card de la oferta-->
-          <div class="card mx-auto" style="max-width: 600px;">
-            <div class="card-body">
-              <h5 class="card-title">{{ appliedOffers[currentOfferIndex].title }}</h5>
-              <p class="card-text">{{ appliedOffers[currentOfferIndex].description }}</p>
-              <p><strong>Ubicación: </strong>{{ appliedOffers[currentOfferIndex].location }}</p>
-              <button
-                class="btn btn-danger position-absolute top-0 end-0 m-2"
-                @click="removeApplication(appliedOffers[currentOfferIndex].id)">
-                <font-awesome-icon :icon="['fas', 'trash']" />
-              </button>
-            </div>
-          </div>
-          
-          <!--Botón derecha-->
-          <button
-            v-if="appliedOffers.length > 1"
-            class="btn btn-secondary position-absolute top-50 end-0 translate-middle-y"
-            @click="nextOffer"
-            :disabled="currentOfferIndex === appliedOffers.length - 1">
-            <font-awesome-icon :icon="['fas', 'chevron-right']" />
-          </button>
-        </div>
-
+      <!-- Ofertas activas -->
+       <div class="col-md-15">
+      <AppliedOffersComponent
+        v-if="appliedOffers && appliedOffers.length"
+        :applied-offers="appliedOffers"
+        :currentOfferIndex="currentOfferIndex"
+        @prev-offer="prevOffer"
+        @next-offer="nextOffer"
+        @remove-application="removeApplication"
+      />
       </div>
-    </div><!--Cierre row-->
+    </div>
+  </div>
 
-  </div> <!--Cierre container-->
-
-
-      <!-- Barra lateral derecha: Cursos y mensajes 
-      <div class="col-md-3">
-        <h3>Cursos disponibles</h3>
-        <div class="list-group">
-          <div class="list-group-item"> <!vfor cuando tengas el código
-            <h5>Nombre del curso</h5>
-            <p>Descripción del curso</p>
-            <a href="#" class="btn btn-info btn-sm">Ver detalles</a>
-          </div>
+  <!--Cursos y mensajes-->
+  <div class="row g-4 mt-4">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Tus cursos</h5>
+          <ul>
+            <li>Cursos</li>
+          </ul>
         </div>
+      </div>
+    </div>
 
-        <h3 class="mt-4">Mensajes</h3>
-        <div class="list-group">
-          <div class="list-group-item"> <!vfor cuando tengas el código
-            <p>Texto del mensaje</p>
-          </div>
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Mensajes</h5>
+          <ul>
+            <li>Mensajes</li>
+          </ul>
         </div>
       </div>
     </div>
   </div>
--->
+</div>
+
 </template>
 
 <style scoped>

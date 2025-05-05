@@ -14,7 +14,8 @@
     "src/components/EmailPasswordForm.vue",
     "src/components/PersonalDataForm-vue",
     "src/components/FileUploadForm.vue",
-    "src/components/RegistrationCompanyForm.vue"
+    "src/components/RegistrationCompanyForm.vue",
+    "src/views/UserView",
 
 
   ]

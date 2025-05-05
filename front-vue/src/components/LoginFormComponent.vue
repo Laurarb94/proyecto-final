@@ -33,13 +33,7 @@ export default {
 
         //Usar el composable useAuth para actualizar el estado global
         const { login } = useAuth();
-        login(response.id, response.token); //establecer estado global con el id y el token
-
-        //localStorage.setItem('userId', response.id);
-        //localStorage.setItem('token', response.jwt); //guardas el token (en el controlador en symfpony al token le has llamado jwt) para poder controlar rutas y quién entra y quién no
-
-        //guardar el token en localStorage
-        //localStorage.setItem('token', response.token);
+        login(response.id, response.token, response.role); //establecer estado global con el id y el token
 
         //Decodificar el token JWT para obtener los datos del usuario
         const tokenPayLoad = JSON.parse(atob(response.token.split('.')[1]));
@@ -49,12 +43,13 @@ export default {
         const userRole = tokenPayLoad.role; 
         console.log('User Role: ', userRole);
 
-        if(userRole === 'ROLE_USER'){
+        //Guardar rol en localStorage
+        localStorage.setItem('userRole', userRole);
+
+        if(userRole === 'ROLE_USER' || userRole === 'ROLE_ADMIN'){
           this.$router.push('/dashboardUser');
         }else if(userRole === 'ROLE_COMPANY'){
           this.$router.push('/dashboardCompany');
-        }else if(userRole === 'ROLE_ADMIN'){
-          this.$router.push('/users');
         }else{
           //manejar casos de error
           console.log('Error: rol desconocido');

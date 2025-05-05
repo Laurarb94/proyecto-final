@@ -1,15 +1,14 @@
 <script setup>
-import { ref, onMounted} from 'vue';
+import { ref, onMounted, computed} from 'vue';
 import { useRouter } from 'vue-router'; 
 import { getUsers, deleteUser, } from '@/services/userService';
 
 
 const router = useRouter(); 
-
 const users = ref([]);
+const searchQuery = ref(""); //para buscar
 
 //Listar a los usuarios:
-
 onMounted(async ()=>{
     try{
         users.value = await getUsers(); //users.value actualiza la variable reactiva = await getUser llama al servicio y espera
@@ -39,55 +38,79 @@ const handleDeleteUser = async (userId) =>{
     }
 }
 
+//Filtro de búsqueda
+const filteredUsers = computed(()=>{
+    if(!users.value) return []; //si los usuarios no se han cargado aún, devolver un array vacío
+
+    return users.value.filter(user=>{
+        return user.name.toLowerCase().includes(searchQuery.value.toLocaleLowerCase()) ||
+            user.email.toLocaleLowerCase().includes(searchQuery.value.toLocaleLowerCase());
+    });
+});
+
 
 </script>
 
 <template>
-    <div class="container">
-        <table v-if="users.length" class="table">
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Primer apellido</th>
-                    <th>Segundo apellido</th>
-                    <th>Email</th>
-                    <th>País</th>
-                    <th>Ciudad</th>
-                    <th>Teléfono</th>
-                    <th>Foto</th>
-                    <th>Rol</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="user in users" :key="user.id">
-                    <td> {{ user.name }} </td>
-                    <td> {{ user.lastName1 }} </td>
-                    <td> {{ user.lastName2 }} </td>
-                    <td> {{ user.email }} </td>
-                    <td> {{ user.country }} </td>
-                    <td> {{ user.city }} </td>
-                    <td> {{ user.phone }} </td>
-                    <td> {{ user.photo }} </td>
-                    <td> {{ user.roles }} </td>
-                    <td>
-                        <font-awesome-icon icon="plus" class="my-icon" @click="handleCreateUser(user.id)"></font-awesome-icon>
-                        <font-awesome-icon icon="user-pen" class="my-icon" @click="handleEditUser(user.id)" />
-                        <font-awesome-icon icon="trash" @click="handleDeleteUser(user.id)"/>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        <p v-else>Cargando usuarios...</p>
-    </div>
+    <div class="container mt-5">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Gestión de usuarios</h5>
+                <button @click="handleCreateUser" class="btn btn-light btn-sm">
+                    <font-awesome-icon icon="plus" /> Añadir usuario
+                </button>
+            </div>
+            
+            <div class="card-body">
+                <div class="form-group mb-3">
+                    <input 
+                        v-model="searchQuery"
+                        type="text"
+                        class="form-control w-50"
+                        placeholder="Buscar por nombre o email"
+                    />
+                </div>
+            
+                <div class="table-responsive">
+                    <table v-if="filteredUsers.length" class="table table-bordered table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Apellidos</th>
+                                <th>Email</th>
+                                <th>Rol</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="user in filteredUsers" :key="user.id">
+                                <td>{{ user.name }}</td>
+                                <td>{{ user.lastName1 }} {{ user.lastName2 }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>{{ user.roles.join(', ') }}</td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-outline-warning me-2" @click="handleEditUser(user.id)">
+                                        <font-awesome-icon icon="user-pen" />
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" @click="handleDeleteUser(user.id)">
+                                        <font-awesome-icon icon="trash" />
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <p v-else class="text-muted">No se encontraron usuarios.</p>
+                </div><!--Fin div tabla-->
+            </div><!--fin cardbody-->
+        </div><!--fin card-->
+    </div><!--fin container-->
+
 </template>
 
 <style scoped>
-  .my-icon{
-    margin-right: 10px;
-  }
-
-
-
+.table th, .table td {
+     vertical-align: middle;
+}
 
 </style>
