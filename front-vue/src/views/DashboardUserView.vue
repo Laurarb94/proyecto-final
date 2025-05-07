@@ -37,6 +37,7 @@ export default {
       subcategories: [],
       successMessage: '',
       selectedSubcategory: null,
+      selectedSubcategoryId: null,
       filteredOffers: [],
       userId: null,    
       currentView: 'offers', // Estado inicial, que indica que las ofertas se muestran al inicio
