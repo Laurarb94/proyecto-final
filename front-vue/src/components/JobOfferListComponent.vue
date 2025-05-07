@@ -4,8 +4,6 @@ import jobOfferService from '@/services/jobOfferService';
 
 //Estado reactivo:
 const offers = ref([]); //para las ofertas
-//const isCompany = ref(false); //Para verificar si es una empresa autenticada
-//const currentUser = ref(null); //usuario actual, que se extrae del token
 const hovered = ref(null); //detectar el hover sobre la oferta
 const editedOfferId = ref(null); //controlar qué oferta está siendo editada
 const offerToDelete = ref(null);

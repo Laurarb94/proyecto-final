@@ -23,7 +23,8 @@ export default {
     //función para obtener las postulaciones del usuario
     async getUserApplications (userId) {
         try {
-            const response = await axios.get(`${API_URL}/user/${userId}/applications/${offerId}`);
+            //const response = await axios.get(`${API_URL}/user/${userId}/applications/${offerId}`);
+            const response = await axios.get(`${API_URL}/user/${userId}/applications`);
             return response;
         } catch (error) {
             throw error;

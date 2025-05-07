@@ -9,6 +9,7 @@ export default {
             searchQuery: '', //almacena el texto de búsqueda
             filteredCategories: this.categories, //inicialmente todas las categorías visibles
             selectedCategoryId: null,
+            selectedCategory: null,
         };
     },
 
@@ -16,11 +17,17 @@ export default {
         selectCategory(category){
             //Establecer la categoría seleccionada
             this.selectedCategoryId = category.id;
+            this.selectedCategory = category;
+            this.searchQuery = category.name;
+            this.filteredCategories = [];
             this.$emit('category-selected', category);
+            
         },
         
         selectSubcategory(subcategory){
             this.$emit('subcategory-selected', subcategory);
+            this.selectedCategory = null;
+            this.selectedCategoryId = null;
         },
 
         //Filtrar categorías según la búsqueda
@@ -37,24 +44,6 @@ export default {
             }
         },
 
-        /*Icono según nombre de la categoría
-        getCategoryIconKey(categoryName){
-            const iconMap = {
-                'Informática': 'laptop',
-                'Salud': 'staff-snake',
-                'Marketing': 'lightbulb',
-                'Ciencias Sociales': 'graduation-cap',
-                'Humanidades': 'book',
-                'Hosteleria y Turismo': 'utensils',
-                'Matemáticas y Estadística':'diagram-project',
-                'Ingenierias': 'tools',
-            }
-            // Devuelve el icono correspondiente si existe, o un valor por defecto (por ejemplo, 'question-circle')
-             return iconMap[categoryName] || 'question-circle'; 
-        }*/
-
-
-
     } //cierre methods
 
 
@@ -62,69 +51,108 @@ export default {
 </script>
 
 <template>
-<div class="card">
-    <div class="card-body">
-        <h5 class="card-title">Explora las categorías y encuentra tu trabajo ideal</h5>
-    </div>
+<div class="search-container">
+    <!-- Barra de búsqueda -->
+    <input
+      type="text"
+      class="form-control search-input"
+      v-model="searchQuery"
+      placeholder="Busca una categoría o subcategoría..."
+      @input="filterCategories"
+    />
 
-    <!--Barra de búsqueda-->
-    <div class="mb-3">
-        <input
-           type="text"
-           class="form-control"
-           v-model="searchQuery"
-           placeholder="Busca una categoría..."
-           @input="filterCategories"
-        />
-    </div>
+    <!-- Lista de resultados -->
+    <ul v-if="filteredCategories.length && searchQuery" class="results-dropdown">
+      <li
+        v-for="category in filteredCategories"
+        :key="category.id"
+        @click="selectCategory(category)"
+        class="result-item"
+      >
+        {{ category.name }}
+      </li>
+    </ul>
 
-    <!--Resultados filtrados de categoría-->
-    <div class="row">
-        <div class="col-6 col-md-3" v-for="category in filteredCategories" :key="category.id">
-            <div class="category-item">
-                <div class="category-link" @click="selectCategory(category)">
-                    <div class="category-icon mx-auto">
-                        <!---<font-awesome-icon :icon="['fas', getCategoryIcon(category.name)]" />-->
-                    </div>
-                    <p class="small mt-2 text-center"> {{ category.name }} </p>
-                </div>
-
-                <div v-if="selectedCategoryId === category.id" class="subcategory-list mt-2">
-                    <div class="collapse show">
-                        <ul class="list-unstyled">
-                            <li v-for="subcategory in category.subcategories" :key="subcategory.id" @click="selectSubcategory(subcategory)">
-                                <a href="#" class="subcategory-link">{{ subcategory.name }}</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <!-- Subcategorías si se ha seleccionado una categoría -->
+    <div v-if="selectedCategory" class="subcategory-container">
+      <h6>Subcategorías de {{ selectedCategory.name }}</h6>
+      <ul class="list-unstyled">
+        <li
+          v-for="subcategory in selectedCategory.subcategories"
+          :key="subcategory.id"
+          @click="selectSubcategory(subcategory)"
+          class="subcategory-item"
+        >
+          {{ subcategory.name }}
+        </li>
+      </ul>
     </div>
-</div>
+  </div>
 </template>
 
 <style scoped>
-/* Estilos para la barra de búsqueda */
-input.form-control {
+.search-container {
+  max-width: 600px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.search-input {
   width: 100%;
-  border-radius: 5px;
-  padding: 10px;
-  margin-bottom: 20px;
+  padding: 12px 16px;
+  border-radius: 25px;
+  border: 1px solid #ccc;
 }
 
-/* Agregar efectos a las categorías y subcategorías */
-.category-item:hover {
-  background-color: #f8f9fa;
+.results-dropdown {
+  position: absolute;
+  /*top: 105%;*/
+  bottom: 105%; /*mostrar resultados arriba de la barra de búsqueda */
+  width: 100%;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  z-index: 1000;
+  max-height: 250px;
+  overflow-y: auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  /*margin-top: 4px;*/
+  margin-bottom: 4px;
+  padding: 0;
+}
+
+.result-item {
+  padding: 10px 16px;
   cursor: pointer;
+  list-style: none;
 }
 
-.subcategory-link {
+.result-item:hover {
+  background-color: #f1f1f1;
+}
+
+/*Subcategorías */
+.subcategory-container {
+  position: absolute; /*para que aparezca sobre los resultados*/
+  padding: 10px; 
+  bottom: 105%; /*mostrar subcategorías arriba */
+  left: 0;
+  width: 100%;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  z-index: 1000; /* Asegura que las subcategorías estén por encima */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.subcategory-item {
+  padding: 6px 12px;
+  cursor: pointer;
   color: #007bff;
-  text-decoration: none;
 }
 
-.subcategory-link:hover {
+.subcategory-item:hover {
   text-decoration: underline;
 }
+
 </style>

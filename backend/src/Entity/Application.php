@@ -13,12 +13,15 @@ class Application
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['application:read'])]
     private ?int $id = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['application:read'])]
     private ?string $coverLetter = null;
 
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+    #[Groups(['application:read'])]
     private ?\DateTimeImmutable $createdAt = null;
 
     //-----------------Relación con usuario---------------------------------------
@@ -34,6 +37,7 @@ class Application
     //Muchos a uno: muchas aplicaciones pueden pertenecer a una oferta de empleo
     #[ORM\ManyToOne(targetEntity: JobOffer::class, inversedBy: 'applications')]
     #[ORM\JoinColumn(nullable:false)]
+    #[Groups(['application:read'])]
     private ?JobOffer $jobOffer = null;
 
 

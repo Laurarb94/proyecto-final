@@ -65,10 +65,10 @@ final class ApplicationController extends AbstractController
         $applications = $appRepo->findBy(['user' => $userId]);
         
         //Usar los grupos que se definen en las entidades para evitra la referencia circular:
-        $data = $this->serializer->serialize($applications, 'json', ['groups'=>['application_read']]);
+        $data = $this->serializer->serialize($applications, 'json', ['groups'=>['application:read']]);
 
-        //return $this->json($applications);
         return new JsonResponse($data, 200, [], true);
+       
     }
 
     //Eliminar ofertas del usuario
