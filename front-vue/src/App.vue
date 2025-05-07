@@ -12,34 +12,6 @@ const handleLogout = () => {
   router.push('/');
 }
 
-
-
-/* Verifica si el usuario está logueado
-const user = ref(localStorage.getItem('userId'));  // Si el 'userId' está en localStorage, el usuario está autenticado
-const router = useRouter();
-
-//Escuchar cambios en el localStorage para mantener el estado reactivo
-const handleStorageChange = () => {
-  user.value = localStorage.getItem('userId');
-};
-
-onMounted(()=>{
-  window.addEventListener('storage', handleStorageChange);
-});
-
-onUnmounted(()=>{
-  window.addEventListener('storage', handleStorageChange);
-});
-
-// Función para hacer log out
-const logout = () => {
-  localStorage.removeItem('userId'); // Eliminar el 'userId' de localStorage al hacer logout
-  localStorage.removeItem('token');
-  user.value = null;  // El usuario ya no está logueado
-  router.push('/');  // Redirigir al inicio después de cerrar sesión
-};
-*/
-
 </script>
 
 <template>
@@ -114,6 +86,10 @@ footer{
   color: white;
   text-align: center;
   padding: 20px 0;
+
+  position: relative;
+  bottom: 0;
+  width: 100%;
 }
 
 

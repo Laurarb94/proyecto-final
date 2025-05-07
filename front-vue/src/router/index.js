@@ -8,6 +8,10 @@ import LoginFormComponent from "@/components/LoginFormComponent.vue";
 import DashboardCompanyView from "@/views/DashboardCompanyView.vue";
 import RegistrationCompanyFormComponent from "@/components/RegistrationCompanyFormComponent.vue";
 import LogoutButtonComponent from "@/components/LogoutButtonComponent.vue";
+import ProfileCardComponent from "@/components/ProfileCardComponent.vue";
+import JobOfferListComponent from "@/components/JobOfferListComponent.vue";
+import MyOffersView from "@/views/MyOffersView.vue";
+
 
 const routes = [
     { path: "/", component: HomeView, name: "home" },
@@ -20,6 +24,9 @@ const routes = [
     { path: "/api/logout", component: LogoutButtonComponent, name: "logout"},
     { path: "/dashboardUser", component: DashboardUserView, name: "dashboardUser", meta: { requiresAuth: true}},//con requireAutrh proteges la ruta
     { path: "/dashboardCompany", component: DashboardCompanyView, name: "dashboardCompany", meta: {requiresAuth: true} },
+    { path: "/profile/:userId", component: ProfileCardComponent, name: "profile", props: true },
+    { path: "/jobOfferList", component: JobOfferListComponent, name: "jobOfferList"},
+    { path: "/myOffers", component: () => import('@/views/MyOffersView.vue'), name: "myOffers"}
 ];
 
 const router = createRouter({

@@ -1,7 +1,7 @@
 <script setup>
-import img1 from '../assets/images/inicio.jpeg';
-import img2 from '../assets/images/inicio2.jpg';
-import img3 from '../assets/images/inicio3.jpg';
+import img1 from '../assets/images/inicio.png';
+import img2 from '../assets/images/inicio2.png';
+import img3 from '../assets/images/inicio3.png';
 
 const imagePaths = [img1, img2, img3];
 

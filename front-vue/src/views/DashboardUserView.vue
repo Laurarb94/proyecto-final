@@ -11,6 +11,7 @@ import AppliedOffersComponent from '@/components/AppliedOffersComponent.vue';
 import applicationService from '@/services/applicationService';
 import Swal from 'sweetalert2';
 import OfferListComponent from '@/components/OfferListComponent.vue';
+import router from '@/router';
 
 export default {
   name: 'DashboardUserView',
@@ -29,16 +30,19 @@ export default {
 
   data() {
     return {
+      
       user:{}, //inicializas como objeto vacío
       offers: [], 
       categories: [],
       subcategories: [],
-      appliedOffers: [], //aquí se guardarán las ofertas en las que se postule el usuario
       successMessage: '',
       selectedSubcategory: null,
       filteredOffers: [],
-      userId: null,
-      currentOfferIndex: 0, //lleva el control de la oferta que estás viendo, para luego que el usuario pueda ir cambiándolas
+      userId: null,    
+      currentView: 'offers', // Estado inicial, que indica que las ofertas se muestran al inicio
+      searchQuery: '', // Aquí se almacena la consulta de búsqueda
+      currentPage: 1, // Página actual para la paginación
+      totalPages: 1, // Total de páginas para la paginación
     };
   },
 
@@ -56,6 +60,32 @@ export default {
   },
 
   methods: {
+    // Método para cambiar la vista a 'profile'
+    goToProfile() {
+      // Verifica que el usuario esté cargado antes de redirigir
+      if (this.user) {
+        // Redirige con el parámetro 'user' a la vista del perfil
+        this.$router.push({ name: 'profile', params: { userId: this.user.id } });
+      } else {
+        console.error('No se pudo encontrar al usuario');
+      }
+  },
+
+    // Método para cambiar la vista a 'offers'
+    goToOffers() {
+      this.$router.push({ name: 'myOffers' });
+    },
+
+    // Método para cambiar la vista a 'courses'
+    goToCourses() {
+      this.currentView = 'courses';
+    },
+
+    // Método para cambiar la vista a 'messages'
+    goToMessages() {
+      this.currentView = 'messages';
+    },
+
     //Método para obtener los datos del usuario al hacer login
     async fetchUserData() {
       try{
@@ -115,19 +145,6 @@ export default {
       }
     },
 
-    async fetchApplications(){
-      try {
-        const response = await applicationService.getUserApplications(this.userId);
-        console.log('Ofertas aplicadas: ', response.data);
-        this.appliedOffers = response.data || []; //guardar postulaciones en el estado local
-
-        localStorage.setItem('appliedOffers', JSON.stringify(this.appliedOffers)); //guardar las posulaciones en el localStorage
-
-      } catch (error) {
-        console.log('Error al obtener las postulaciones: ', error);
-      }
-    },
-
     handleApplyOffer(offerId){
       const offerToApply = this.offers.find(offer=>offer.id === offerId);
       if(offerToApply){
@@ -152,6 +169,10 @@ export default {
           this.offers = this.offers.filter(offer => offer.id !== offerId);
           localStorage.setItem('appliedOffers', JSON.stringify(this.appliedOffers));
         }
+
+        this.$router.push({ name: 'myOffers' });
+
+
       } catch (error) {
         Swal.fire({
           icon: 'error',
@@ -162,45 +183,11 @@ export default {
       }
     },
 
-    prevOffer(){
-      if(this.currentOfferIndex > 0){
-        this.currentOfferIndex--;
-      }
+    clearFilter(){
+      this.selectedSubcategoryId = null;
+      this.filteredOffers = [];
     },
 
-    nextOffer(){
-      if(this.currentOfferIndex < this.appliedOffers.length -1){
-        this.currentOfferIndex++;
-      }
-    },
-
-    async removeApplication(id){
-      const result = await Swal.fire({
-        title: '¿Estás seguro',
-        text: '¿Quieres cancelar tu postulación a esta oferta?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Sí, cancelar',
-        cancelButtonText: 'No, mantener',
-        reverseButtons: true
-      });
-
-      if(result.isConfirmed){
-        this.appliedOffers = this.appliedOffers.filter(o => o.id !==id);
-          if(this.currentOfferIndex >= this.appliedOffers.length){
-            this.currentOfferIndex = Math.max(this.appliedOffers.length -1, 0);
-          }
-
-          Swal.fire(
-            'Postulación cancelada!',
-            'Te has desinscrito de la oferta correctamente',
-            'success'
-          );
-      }
-
-    },
-
-    //Método para hacer el logout
     async logout(){
       try{
         //llamar al servicio del logout
@@ -227,181 +214,213 @@ export default {
 </script>
 
 <template>
-<div class="container my-4">
-  <!--Mensaje de éxito-->
-  <div v-if="successMessage" class="alert alert-success alert-dismissible fade show" role="alert">
-    {{ successMessage }}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  </div>
+ <div class="container my-4">
 
-  <!--Admin-->
-  <div v-if="isAdmin">
-    <div class="card mb-4">
-      <div class="card-header bg-dark text-white">Administración de usuarios</div>
-      <div class="card-body">
-        <UserComponent />
+    <!-- Banner de Bienvenida/Introducción, solo se ve cuando no hay una oferta seleccionada -->
+    <div class="intro-container fade-in" v-if="!selectedSubcategoryId">
+      <div class="intro-banner">
+      <h2>Bienvenida/o a nuestra plataforma de búsqueda de empleo</h2>
+      <p>Encuentra las mejores ofertas de empleo, postúlate fácilmente y gestiona tu perfil profesional.</p>
+      <p>Conéctate con personas que, al igual que tú, están listas para reinventarse profesionalmente.</p>
+      <p>Apúntate a nuestros cursos y destaca en tu próximo empleo. ¡El futuro está a tu alcance!</p>
+    </div>
+    <img src="../assets/images/fotoInicio.png" alt="búsqueda de empleo" class="intro-image" />
+    </div>
+
+
+    <!-- Ofertas de empleo, resultados filtrados cuando clicas en subcategoría -->
+    <div class="row justify-content-center fade-in">
+      <div class="col-md-4" v-for="offer in filteredOffers" :key="offer.id">
+        <div class="job-card">
+          <div class="job-header">
+            <h5>{{ offer.title }}</h5>
+          </div>
+          <p class="job-description">{{ offer.description }}</p>
+          <button class="btn btn-primary" @click="handleApplyOffer(offer.id)">Aplicar</button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!--Perfil + Ofertas activas-->
-  <div class="row g-4">
-    <!-- Perfil -->
-    <div class="col-md-4">
-      <ProfileCardComponent :user="user" />
-    </div>
 
-    <!-- Ofertas activas + Buscador -->
-    <div class="col-md-8">
-      <!-- Buscador en la parte superior de las ofertas -->
-      <div class="d-flex justify-content-center">
-        <CategoryFilterComponent
+    <!-- Barra de búsqueda (filtros) -->
+    <div class="search-bar">
+      <CategoryFilterComponent
           :categories="categories"
           @subcategory-selected="selectSubcategory"
           class="w-75"
-        />
-      </div>
-
-      <!-- Ofertas activas -->
-       <div class="col-md-15">
-      <AppliedOffersComponent
-        v-if="appliedOffers && appliedOffers.length"
-        :applied-offers="appliedOffers"
-        :currentOfferIndex="currentOfferIndex"
-        @prev-offer="prevOffer"
-        @next-offer="nextOffer"
-        @remove-application="removeApplication"
       />
-      </div>
-    </div>
-  </div>
-
-  <!--Cursos y mensajes-->
-  <div class="row g-4 mt-4">
-    <div class="col-md-6">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Tus cursos</h5>
-          <ul>
-            <li>Cursos</li>
-          </ul>
-        </div>
-      </div>
     </div>
 
-    <div class="col-md-6">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Mensajes</h5>
-          <ul>
-            <li>Mensajes</li>
-          </ul>
-        </div>
-      </div>
+    <!--Limpiar el filtro-->
+    <div v-if="selectedSubcategoryId" class="mb-3 text-end">
+      <button class="btn btn-outline-secondary" @click="clearFilter">Limpiar filtro</button>
     </div>
+
+    <!-- Menú de Usuario -->
+    <div class="user-menu">
+      <button class="btn btn-secondary" @click="goToProfile">Mi Perfil</button>
+      <button class="btn btn-secondary" @click="goToOffers">Ofertas de Empleo</button>
+      <button class="btn btn-secondary" @click="goToCourses">Mis Cursos</button>
+      <button class="btn btn-secondary" @click="goToMessages">Mensajes</button>
+    </div>
+
   </div>
-</div>
 
 </template>
 
 <style scoped>
-.card {
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  transition: box-shadow 0.3s ease;
+.intro-container {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
 }
 
-.card:hover{
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+/* Banner de introducción */
+.intro-banner {
+  padding: 2rem;
+  border-radius: 10px;
+  margin-bottom: 2rem;
+  text-align: justify;
+  flex: 1;
 }
 
-.btn.apply{
-  background-color: #007bff;
-  border-color: #007bff;
-  padding: 12px 20px;
+.intro-image{
+  width: 300px;
+  max-width: 200%;
+}
+
+.intro-banner h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.intro-banner p {
   font-size: 1.1rem;
-  border-radius: 5px;
-  text-transform: uppercase;
+  color: #555;
+}
+
+
+/* Barra de búsqueda */
+.search-bar {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+
+.search-bar input {
+  width: 75%;
+  border-radius: 25px;
+  padding: 10px;
+  font-size: 1.1rem;
+}
+
+.search-bar button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 1rem;
   transition: background-color 0.3s ease;
 }
 
-.btn.apply:hover{
-  background-color: #218838;
-  border-color: #1e7e34;
+.search-bar button:hover {
+  background-color: #0056b3;
 }
 
-.card-body {
-  padding: 1.5rem;
+/* Menú de usuario */
+.user-menu {
+  display: flex;
+  justify-content: flex-start;
+  gap: 15px;
+  margin-bottom: 2rem;
 }
 
-.card-text{
+.user-menu button {
+  background-color: #f1f1f1;
+  color: #333;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 25px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.user-menu button:hover {
+  background-color: #007bff;
+  color: white;
+}
+
+/* Tarjetas de ofertas de empleo */
+.job-card {
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+  transition: box-shadow 0.3s ease;
+}
+
+.job-card:hover {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.job-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.company-logo {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-right: 15px;
+}
+
+.job-card h5 {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.job-description {
   font-size: 1rem;
   color: #555;
-  line-height: 1.5;
-  text-align: justify;
+  margin-bottom: 1rem;
 }
 
-.card-title {
-  font-size: 1.25rem;
-}
-
-.btn.cv {
+.job-card button {
   background-color: #007bff;
-  border-color: #007bff;
-  box-shadow: 0 4px 6px rgba(0, 123, 255, 0.3);
-  transition: all 0,3s ease;
-}
-
-.btn.cv:hover{
-  background-color: #0056b3;
-  border-color: #0056b3;
-}
-.profile-card{
-  display: flex;
-  flex-direction: row-reverse;
-  align-items: center;
-  gap: 20px;
-}
-
-.profile-photo {
-  border-radius: 50%;
-  border: 3px solid #f0f0f0;
-  width: 120px;
-  height: 120px;
-  object-fit: cover;
-  margin-bottom: 15px;
-}
-
-.category-item {
-  text-align: center;
-  border: 2px solid #ddd;
-  padding: 15px;
-  border-radius: 100px; /* Tarjetas más redondeadas */
-  /*transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;*/
-}
-
-.category-icon:hover{
-  transform: scale(1.05);
-  box-shadow: 0 8px 16px rgb(0, 0, 0, 0.2);
-  background-color: #f1f1f1;
-}
-
-.category-icon {
-  font-size: 2rem;
-  color: #007bff;
-  transition: color 0.3s ease;
-}
-
-.category-link {
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 25px;
   cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
-.category-icon:hover {
-  color: #0056b3;
+.job-card button:hover {
+  background-color: #0056b3;
 }
 
-.btn.prevOffer:disabled{
-  background-color: #ccc;
+.fade-in {
+  animation: fadeIn 0.7s ease-in-out both;
 }
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 
 </style>
