@@ -264,6 +264,15 @@ final class UserController extends AbstractController{
         return new JsonResponse(['message' => 'Curso eliminado del usuario']);
     }
 
+    /*---------------------Método para que devuelva los usuarios y poder comunicarse por mensaje------------------------ */
+    #[Route('/api/users-message', name: 'users_message_list', methods: ['GET'])]
+    public function listUsers(SerializerInterface $serializer): JsonResponse
+    {
+        $users = $this->em->getRepository(User::class)->findAll();
+        $data = $serializer->serialize($users, 'json', ['groups' => ['user:read']]);
+        
+        return new JsonResponse($data, Response::HTTP_OK, [], true);
+    }
 
 
 
