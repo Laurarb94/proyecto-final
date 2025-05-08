@@ -43,4 +43,25 @@ final class CourseController extends AbstractController{
             'subcategory' => $course->getSubcategory()?->getName(),
         ]);
     }
+
+    #[Route('/subcategory/{subcategoryId}', name: 'courses_by_subcategory', methods: ['GET'])]
+    public function getCourseBySubcategory(int $subcategoryId, CourseRepository $courserRepo): JsonResponse
+    {
+        $courses = $courserRepo->findBy(['subcategory' => $subcategoryId]);
+
+        $data = [];
+
+        foreach($courses as $course){
+            $data[] = [
+                'id' => $course->getId(),
+                'title' => $course->getTitle(),
+                'content' => $course->getContent(),
+                'category' => $course->getCategory(),
+                'subcategory' => $course->getSubcategory(),
+            ];
+        }
+
+        return new JsonResponse($data);
+    }
+
 }
