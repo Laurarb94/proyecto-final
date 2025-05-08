@@ -8,6 +8,7 @@ use App\Repository\UserRepository;
 use ContainerH34GUZX\getApiPlatform_JsonSchema_BackwardCompatibleSchemaFactoryService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,6 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
+use Psr\Log\LoggerInterface;
 
 
 final class UserController extends AbstractController{
@@ -261,10 +263,6 @@ final class UserController extends AbstractController{
 
         return new JsonResponse(['message' => 'Curso eliminado del usuario']);
     }
-
-
-
-
 
 
 
