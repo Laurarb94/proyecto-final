@@ -79,6 +79,11 @@ class Course
 
 
     //Relación con usuarios. 
+    public function getStudents(): Collection
+    {
+        return $this->students;
+    }
+
     public function addStudents(User $students): self
     {
         if(!$this->students->contains($students)){
