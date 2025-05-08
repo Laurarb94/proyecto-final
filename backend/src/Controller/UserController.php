@@ -6,6 +6,7 @@ use App\Entity\User;
 use App\Repository\CourseRepository;
 use App\Repository\UserRepository;
 use ContainerH34GUZX\getApiPlatform_JsonSchema_BackwardCompatibleSchemaFactoryService;
+use Doctrine\Migrations\Finder\Finder;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -230,8 +231,37 @@ final class UserController extends AbstractController{
     }
 
 
-    /*----------------------------Método para inscribirse y desisncribrise a un curso. Está en este controller porque
+    /*----------------------------Métodos obtener curso por usuario, para inscribirse y desisncribrise a un curso. Está en este controller porque
     la acción recae sobre el usuario!!..------------------------- */
+
+    #[Route('api/user/{userId}/courses', name: 'user_get_courses', methods: ['GET'])]
+    public function getCoursesForUser(int $userId, UserRepository $userRepo): JsonResponse
+    {
+        $user = $userRepo->find($userId);
+    
+        if (!$user) {
+            return new JsonResponse(['message' => 'Usuario no encontrado'], 404);
+        }
+    
+        // Obtener los cursos del usuario
+        $courses = $user->getCourses(); // Método que devuelve los cursos asociados al usuario
+    
+        $courseData = [];
+    
+        foreach ($courses as $course) {
+            $courseData[] = [
+                'id' => $course->getId(),
+                'title' => $course->getTitle(),
+                'content' => $course->getContent(),
+                'category' => $course->getCategory()?->getName(),
+                'subcategory' => $course->getSubcategory()?->getName(),
+            ];
+        }
+    
+        return new JsonResponse($courseData);
+    }
+    
+    
     #[Route('api/user/{userId}/courses/{courseId}', name: 'user_add_course', methods: ['POST'])]
     public function addCourseToUser(int $userId, int $courseId, EntityManagerInterface $em, UserRepository $userRepo, CourseRepository $courseRepo ): JsonResponse
     {

@@ -310,6 +310,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
 
     //-------------------------Relación cursos---------------------------
+    public function getCourses(): Collection
+    {
+        return $this->courses;
+    }
+
     public function addCourse(Course $course): self
     {
         if(!$this->courses->contains($course)){
