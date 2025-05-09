@@ -1,37 +1,52 @@
 <script>
 import AppliedOffersComponent from '@/components/AppliedOffersComponent.vue';
 import applicationService from '@/services/applicationService';
+import UserCoursesComponent from '@/components/UserCoursesComponent.vue';
+import courseService from '@/services/courseService';
 import Swal from 'sweetalert2';
 
 export default {
-    components: { AppliedOffersComponent},
+    components: { 
+      AppliedOffersComponent,
+      UserCoursesComponent
+    },
 
     data(){
         return {
             appliedOffers: [],
+            enrrolledCourses: [],
             currentOfferIndex: 0,
+            currentCourseIndex: 0,
             userId: null 
         };
     },
 
     async created() {
-  this.userId = parseInt(localStorage.getItem('userId'));
+      this.userId = parseInt(localStorage.getItem('userId'));
+      
+      try {
+        const response = await applicationService.getUserApplications(this.userId);
+        this.appliedOffers = response.data || [];
+        
+        if (this.appliedOffers.length > 0) {
+          this.currentOfferIndex = 0;
+        } else {
+          this.currentOfferIndex = -1;
+        }
+        
+        console.log('Ofertas aplicadas:', this.appliedOffers);
+      } catch (error) {
+        console.error('Error al obtener las aplicaciones:', error);
+      }
 
-  try {
-    const response = await applicationService.getUserApplications(this.userId);
-    this.appliedOffers = response.data || [];
-
-    if (this.appliedOffers.length > 0) {
-      this.currentOfferIndex = 0;
-    } else {
-      this.currentOfferIndex = -1;
-    }
-
-    console.log('Ofertas aplicadas:', this.appliedOffers);
-  } catch (error) {
-    console.error('Error al obtener las aplicaciones:', error);
-  }
-},
+      try {
+        const response = await courseService.getUserCourses(this.userId);
+        this.enrrolledCourses = response.data || [];
+      } catch (error) {
+        console.log('Error al obtener los cursos: ', error);
+      }
+    
+    },
 
     methods: {
       prevOffer(){
@@ -40,6 +55,14 @@ export default {
 
       nextOffer(){
         if (this.currentOfferIndex < this.appliedOffers.length - 1) this.currentOfferIndex++;
+      },
+
+      prevCourse(){
+        if(this.currentCourseIndex > 0) this.currentCourseIndex--;
+      },
+
+      nextCourse(){
+        if(this.currentCourseIndex < this.enrrolledCourses.length -1) this.currentCourseIndex++;
       },
 
       async removeApplication(offerId){
@@ -83,6 +106,14 @@ export default {
        @prev-offer = "prevOffer"
        @next-offer = "nextOffer"
        @remove-application = "removeApplication"
+   />
+
+   <h2 class="title mt-5">Mis cursos</h2>
+   <UserCoursesComponent
+      :courses="enrrolledCourses"
+      :currentCourseIndex="currentCourseIndex"
+      @prev-course="prevCourse"
+      @next-course="nextCourse"
    />
 </div>
 
