@@ -11,6 +11,8 @@ import LogoutButtonComponent from "@/components/LogoutButtonComponent.vue";
 import ProfileCardComponent from "@/components/ProfileCardComponent.vue";
 import JobOfferListComponent from "@/components/JobOfferListComponent.vue";
 import MyOffersView from "@/views/MyOffersView.vue";
+import UserCoursesComponent from "@/components/UserCoursesComponent.vue";
+import UserMessagesComponent from "@/components/UserMessagesComponent.vue";
 
 
 const routes = [
@@ -26,7 +28,9 @@ const routes = [
     { path: "/dashboardCompany", component: DashboardCompanyView, name: "dashboardCompany", meta: {requiresAuth: true} },
     { path: "/profile/:userId", component: ProfileCardComponent, name: "profile", props: true },
     { path: "/jobOfferList", component: JobOfferListComponent, name: "jobOfferList"},
-    { path: "/myOffers", component: () => import('@/views/MyOffersView.vue'), name: "myOffers"}
+    { path: "/myOffers", component: () => import('@/views/MyOffersView.vue'), name: "myOffers"},
+    { path: "/messages", component: () => import('@/views/MessagesView.vue'), name: "messages" },
+    { path: "/my-courses",  component: () => import('@/views/MyCoursesView.vue'), name:"myCourses" }
 ];
 
 const router = createRouter({

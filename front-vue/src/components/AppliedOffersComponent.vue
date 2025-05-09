@@ -31,8 +31,8 @@ export default {
 <div v-if="appliedOffers.length > 0" class="position-relative py-4">
 
     <!--Contador-->
-    <div class="text-center mb-3">
-        <span class="badge bg-primary fs-6">{{ currentOfferIndex +1 }} de {{ appliedOffers.length }}</span>
+    <div class="custom-counter">
+      {{ currentOfferIndex +1 }} de {{ appliedOffers.length }}
     </div>
 
     <!--Navegación y card-->
@@ -90,7 +90,6 @@ export default {
 </template>
 
 <style scoped>
-
 .offers-container{
   display: flex;
   flex-direction: column;
@@ -105,72 +104,111 @@ export default {
   margin-bottom: 2rem;
 }
 
+.custom-counter{
+  display: inline-block;
+  background-color: #6c63ff;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 25px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  margin-bottom: 1.5rem;
+}
+
 .offer-card{
+  background-color: #ffffff; 
+  border-left: 4px solid #6c63ff; 
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 40px 20px 20px 20px;
+  margin: 10px auto 20px auto;
   max-width: 600px;
-  width: 100%;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  background-color: white;
-  margin-top: 10px;
-  margin-bottom: 20px;
+  min-height: 220px;
+  transition: box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  text-align: center;
+}
+
+.offer-card:hover{
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
 }
 
 .offer-card h5{
   font-size: 1.25rem;
   font-weight: bold;
   margin-bottom: 10px;
+  color: #6c63ff;
 }
 
 .offer-card .card-text{
   font-size: 1rem;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+  color: #555;
 }
 
-button{
+.offer-card .card-body {
+  padding-right: 50px; /* deja espacio para el botón */
+  position: relative;
+}
+
+.btn-outline-secondary,
+.btn-secondary {
+  background-color: transparent;
+  color: #6c63ff;
+  border: 1px solid #6c63ff;
+  padding: 8px 16px;
+  border-radius: 25px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-secondary:hover,
+.btn-secondary:hover {
+  background-color: #6c63ff;
+  color: #fff;
+}
+
+/* Papelera */
+button.btn-danger {
+  background-color: transparent;
+  color: #f44336;
+  border: 1px solid #f44336;
+  transition: all 0.3s ease;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  width: 35px;
-  height: 35px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
-button:disabled{
-  opacity: 0.5;
+button.btn-danger.position-absolute {
+  top: 12px;
+  right: 12px;
+  z-index: 2;
 }
 
-button.btn-danger{
+button.btn-danger:hover {
   background-color: #f44336;
+  color: #fff;
 }
 
-button.btn-outline-secondary{
-  background-color: #f1f1f1;
-  color: #333;
-  border: 1px solid #ccc;
-}
-
-.card-footer .btn{
-  background-color: #007bff;
-  color: #fff; 
-  padding: 14px 28px; 
-  font-size: 1rem; 
-  border-radius: 30px; 
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
-  transition: all 0.3s ease-in-out; 
-  border: none; 
+/* Botón "Volver" */
+.card-footer .btn {
+  background-color: transparent;
+  color: #6c63ff;
+  border: 1px solid #6c63ff;
+  padding: 12px 28px;
+  font-size: 1rem;
+  border-radius: 30px;
+  transition: all 0.3s ease-in-out;
 }
 
 .card-footer .btn:hover {
-  background-color: #0056b3; 
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); 
+  background-color: #6c63ff;
+  color: #fff;
 }
-
-.card-footer .btn:focus {
-  outline: none; 
-  box-shadow: 0 0 0 3px rgba(38, 143, 255, 0.5); 
-}
-
 
 </style>
