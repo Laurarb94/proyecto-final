@@ -1,84 +1,83 @@
-<script>
-import courseService from '@/services/courseService';
-import axios from 'axios';
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import axios from 'axios'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import Swal from 'sweetalert2'
 
-export default {
-   props: {
-    courses: Array,
-    currentCourseIndex: Number, 
-    userId: Number
-  },
+const emit = defineEmits(['prev-course', 'next-course', 'remove-application'])
 
-  data(){
-    return{
-        localCourses: [], //dato interno para almacenar los cursos
-        localUserId: null,
-    }
-  },
+const router = useRouter()
+const localCourses = ref([])
+const currentIndex = ref(0)
+const localUserId = ref(null)
 
-  watch: {
-    // Si la prop 'courses' cambia, actualizar 'localCourses'
-    courses(newCourses) {
-      this.localCourses = newCourses;
-    }
-  },
-
-  mounted() {
-  // Verificar si el `userId` está disponible en el localStorage
-  const userIdFromLocalStorage = localStorage.getItem('userId');
-  console.log("User ID desde localStorage:", userIdFromLocalStorage);
-
-  // Si restá en el localStorage, lo asignamos a localuserid
-  if (userIdFromLocalStorage) {
-    this.localUserId = userIdFromLocalStorage;
+onMounted(() => {
+  const storedUserId = window.localStorage.getItem('userId')
+  if (storedUserId) {
+    localUserId.value = storedUserId
+    getUserCourses(localUserId.value)
   } else {
-    console.error("No se encontró el userId en localStorage.");
+    console.error('No se encontró el userId.')
   }
+})
 
-  //usar localUserId en lugar de intentar cambiar el `prop` directamente
-  if (!this.localCourses || this.localCourses.length === 0) {
-    this.getUserCourses(this.localUserId); // Hacer la solicitud a la API usando el `localUserId`
+async function getUserCourses(userId) {
+  try {
+    const response = await axios.get(`http://localhost:8000/api/user/${userId}/courses`)
+    if (response.data && response.data.length > 0) {
+      localCourses.value = response.data
+    } else {
+      console.log('No se encontraron cursos.')
+    }
+  } catch (error) {
+    console.error('Error al obtener los cursos:', error)
   }
-},
-
-methods: {
-  async getUserCourses(userId) {
-    try {
-      const response = await axios.get(`http://localhost:8000/api/user/${userId}/courses`);
-      console.log("Cursos obtenidos:", response.data);
-      if (response.data && response.data.length > 0) {
-        this.localCourses = response.data;
-      } else {
-        console.log("No se encontraron cursos.");
-      }
-    } catch (error) {
-      console.error("Error al obtener los cursos:", error);
-    }
-  }, 
-
-  prevCourse(){
-    if(this.currentCourseIndex > 0){
-        this.$emit('prev-course');
-    }
-  },
-
-  nextCourse(){
-    if(this.currentCourseIndex < this.getUserCourses.length -1){
-        this.$emit('next-offer');
-    }
-  },
-
-  removeCouse(courseId){
-    this.$emit('remove-application', courseId);
-  },
-
-  goBack(){
-    this.$router.go(-1);
-  }
-
-
 }
-};
+
+function prevCourse() {
+  if (currentIndex.value > 0) {
+    currentIndex.value--
+  }
+}
+
+function nextCourse() {
+  if (currentIndex.value < localCourses.value.length - 1) {
+    currentIndex.value++
+  }
+}
+
+async function removeCourse(courseId) {
+  const result = await Swal.fire({
+    title: '¿Estás seguro?',
+    text: '¿Quieres eliminar este curso?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar',
+    reverseButtons: true
+  })
+
+  if (result.isConfirmed) {
+    localCourses.value = localCourses.value.filter(course => course.id !== courseId)
+    if (currentIndex.value >= localCourses.value.length) {
+      currentIndex.value = Math.max(localCourses.value.length - 1, 0)
+    }
+
+    await Swal.fire({
+      title: 'Eliminado',
+      text: 'El curso ha sido eliminado correctamente',
+      icon: 'success',
+      timer: 1500,
+      showConfirmButton: false
+    })
+  }
+}
+
+function goBack() {
+  router.go(-1)
+}
+
 </script>
 
 <template>
@@ -86,7 +85,7 @@ methods: {
 
     <!--Contador-->
     <div class="custom-counter">
-        {{ currentCourseIndex +1 }} de {{ localCourses.length }}
+        {{ currentIndex +1 }} de {{ localCourses.length }}
     </div>
 
     <!--Navegación y card-->
@@ -95,36 +94,38 @@ methods: {
            v-if="localCourses.length > 1"
            class="btn btn-secondary"
            @click="prevCourse"
-           :disabled="currentCourseIndex === 0">
+           :disabled="currentIndex === 0">
             <font-awesome-icon :icon="['fas', 'chevron-left']" />
         </button>
 
         <!--card del curso-->
-        <div class="course-card w.75 mx-auto">
-            <div v-if="localCourses[currentCourseIndex]" class="card-body position-relativ">
-                <h5 class="card-title">{{ localCourses[currentCourseIndex].title }}</h5>
-                <p class="card-text">{{ localCourses[currentCourseIndex].content }}</p>
-                <p class="card-text">{{ localCourses[currentCourseIndex].category }}</p>
-                <p class="card-text">{{ localCourses[currentCourseIndex].subcategory }}</p>
+        <div class="course-card w-75 mx-auto">
+            <div v-if="localCourses[currentIndex]" class="card-body position-relativ">
+                <h5 class="card-title">{{ localCourses[currentIndex].title }}</h5>
+                <p class="card-text">{{ localCourses[currentIndex].content }}</p>
+                <p class="card-text">{{ localCourses[currentIndex].category }}</p>
+                <p class="card-text">{{ localCourses[currentIndex].subcategory }}</p>
             </div>
 
             <!--Botón eliminar curso-->
             <button
-               class="btn btn-danger position absolute tio-0 end-0 m-2"
-               @click="removeCouse(localCourses[currentCourseIndex].id)">
+               class="btn btn-danger position-absolute top-0 end-0 m-2"
+               @click="removeCourse(localCourses[currentIndex].id)">
                <font-awesome-icon :icon="['fas', 'trash']" />
             </button>
         </div>
+
+            <!--Botón siguiente-->
+            <button 
+                v-if="localCourses.length > 1"
+                class="btn btn-outline-secondary"
+                @click="nextCourse"
+                :disabled="currentIndex === localCourses.length -1" >
+                <font-awesome-icon :icon="['fas', 'chevron-right']" />  
+            </button>
+
     </div>
 
-    <!--Botón siguiente-->
-    <button 
-       v-if="localCourses.length > 1"
-       class="btn btn-outline-secondary"
-       @click="nextCourse"
-       :disabled="currentCourseIndex === getUserCourses.length -1" >
-       <font-awesome-icon :icon="['fas', 'chevron-right']" />  
-    </button>
 
     <div class="card-footer text-center mt-4">
         <button @click="goBack" class="btn btn-secondary">Volver</button>
@@ -261,8 +262,5 @@ button.btn-danger:hover {
   background-color: #6c63ff;
   color: #fff;
 }
-
-
-
 
 </style>

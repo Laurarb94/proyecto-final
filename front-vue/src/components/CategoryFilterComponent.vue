@@ -1,53 +1,59 @@
-<script>
-export default {
-    props: {
-        categories: Array
-    },
+<script setup>
+import { ref, computed, watch, defineProps, defineEmits } from 'vue'
 
-    data() {
-        return {
-            searchQuery: '', //almacena el texto de búsqueda
-            filteredCategories: this.categories, //inicialmente todas las categorías visibles
-            selectedCategoryId: null,
-            selectedCategory: null,
-        };
-    },
+// Props
+const props = defineProps({
+  categories: {
+    type: Array,
+    required: true
+  }
+})
 
-    methods: {
-        selectCategory(category){
-            //Establecer la categoría seleccionada
-            this.selectedCategoryId = category.id;
-            this.selectedCategory = category;
-            this.searchQuery = category.name;
-            this.filteredCategories = [];
-            this.$emit('category-selected', category);
-            
-        },
-        
-        selectSubcategory(subcategory){
-            this.$emit('subcategory-selected', subcategory);
-            this.selectedCategory = null;
-            this.selectedCategoryId = null;
-        },
+// Emit
+const emit = defineEmits(['category-selected', 'subcategory-selected'])
 
-        //Filtrar categorías según la búsqueda
-        filterCategories() {
-            if (this.searchQuery === '') {
-                this.filteredCategories = this.categories;
-            } else {
-                this.filteredCategories = this.categories.filter(category =>
-                    category.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-                        category.subcategories.some(subcategory =>
-                        subcategory.name.toLowerCase().includes(this.searchQuery.toLowerCase())
-                    )
-                );
-            }
-        },
+// Estado
+const searchQuery = ref('')
+const filteredCategories = ref([...props.categories])
+const selectedCategoryId = ref(null)
+const selectedCategory = ref(null)
 
-    } //cierre methods
+// Métodos
+function selectCategory(category) {
+  selectedCategoryId.value = category.id
+  selectedCategory.value = category
+  searchQuery.value = category.name
+  filteredCategories.value = []
+  emit('category-selected', category)
+}
 
+function selectSubcategory(subcategory) {
+  emit('subcategory-selected', subcategory)
 
-};
+  //limpiar todo
+  selectedCategory.value = null
+  selectedCategoryId.value = null
+  searchQuery.value = ''
+  filteredCategories.value = []
+}
+
+function filterCategories() {
+  if (searchQuery.value === '') {
+    filteredCategories.value = [...props.categories]
+  } else {
+    const query = searchQuery.value.toLowerCase()
+    filteredCategories.value = props.categories.filter(category =>
+      category.name.toLowerCase().includes(query) ||
+      category.subcategories.some(sub =>
+        sub.name.toLowerCase().includes(query)
+      )
+    )
+  }
+}
+
+// Refiltrar automáticamente al modificar la búsqueda
+watch(searchQuery, filterCategories)
+
 </script>
 
 <template>

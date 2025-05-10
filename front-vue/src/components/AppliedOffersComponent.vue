@@ -1,29 +1,43 @@
-<script>
-export default {
-  props: {
-    appliedOffers: Array,
-    currentOfferIndex: Number
-  },
+<script setup>
+import { defineProps, defineEmits } from 'vue'
+import { useRouter } from 'vue-router'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
-  methods: {
-    prevOffer() {
-      if(this.currentOfferIndex > 0){
-        this.$emit('prev-offer');
-      }
-    },
-    nextOffer() {
-      if(this.currentOfferIndex < this.appliedOffers.length -1){
-        this.$emit('next-offer');
-      }
-    },
-    removeApplication(offerId) {
-      this.$emit('remove-application', offerId);
-    },
-    goBack() {
-      this.$router.go(-1); 
-    }
+const props = defineProps({
+  appliedOffers: {
+    type: Array,
+    required: true
+  },
+  currentOfferIndex: {
+    type: Number,
+    required: true
   }
-};
+})
+
+const emit = defineEmits(['prev-offer', 'next-offer', 'remove-application'])
+
+const router = useRouter()
+
+function prevOffer() {
+  if (props.currentOfferIndex > 0) {
+    emit('prev-offer')
+  }
+}
+
+function nextOffer() {
+  if (props.currentOfferIndex < props.appliedOffers.length - 1) {
+    emit('next-offer')
+  }
+}
+
+function removeApplication(offerId) {
+  emit('remove-application', offerId)
+}
+
+function goBack() {
+  router.go(-1)
+}
+
 </script>
 
 <template>
