@@ -1,36 +1,51 @@
-<script>
-import axios from 'axios';
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import axios from 'axios'
+import { editUser } from '@/services/userService'
 
-export default {
-  props: {
-    userId: {
-      type: [String, Number],
-      required: true
-    }
-  },
+const props = defineProps({
+  userId: {
+    type: [String, Number],
+    required: true
+  }
+})
 
-  data() {
-    return {
-      user: null
-    };
-  },
-  
-  async mounted() {
+const router = useRouter()
+const user = ref(null)
+const editingField = ref(null)
+
+onMounted(async () => {
+  try {
+    const res = await axios.get(`http://localhost:8000/api/users/${props.userId}`)
+    user.value = res.data
+  } catch (err) {
+    console.error('Error al obtener usuario:', err)
+  }
+})
+
+function goBack() {
+  router.go(-1)
+}
+
+function startEditing(field) {
+  editingField.value = field
+}
+
+async function stopEditing() {
+  if (editingField.value && user.value) {
     try {
-      const res = await axios.get(`http://localhost:8000/api/users/${this.userId}`);
-      this.user = res.data;
-    } catch (err) {
-      console.error("Error al obtener usuario:", err);
-    }
-  },
-
-  methods: {
-    goBack() {
-      this.$router.go(-1); // Regresa a la página anterior en el historial
+      const updatedUser = { ...user.value } //crea una copia del usuario actual para enviar al back
+      if (typeof updatedUser.roles === 'string') {
+        updatedUser.roles = [updatedUser.roles]
+      }
+      await editUser(user.value.id, updatedUser) //aquí llamas a la api y así se guarda en bbss
+    } catch (error) {
+      console.log('Error al guardar los cambios: ', error)
     }
   }
-};
-
+  editingField.value = null
+}
 
 </script>
 
@@ -54,12 +69,32 @@ export default {
             </div>
 
             <div class="card-body">
-                <p><strong>Nombre:</strong> {{ user.name }} {{ user.lastName1 }} {{ user.lastName2 }}</p>
-                <p><strong>Ubicación:</strong> {{ user.city }}, {{ user.country }}</p>
-                <p v-if="user.biography" class="card-text">
-                    <strong>Mi carta de presentación:</strong><br />
-                    <span class="biography-text">{{ user.biography }}</span>
+
+                <p class="editable" @mouseenter="startEditing('fullName')" @mouseleave="stopEditing">
+                    <strong>Nombre:</strong>
+                    <span v-if="editingField !== 'fullName'">{{ user.name }} {{ user.lastName1 }} {{ user.lastName2 }}</span>
+                    <span v-else>
+                        <input v-model="user.name" class="form-control mb-1" placeholder="Nombre" />
+                        <input v-model="user.lastName1" class="form-control mb-1" placeholder="Primer apellido" />
+                        <input v-model="user.lastName2" class="form-control" placeholder="Segundo apellido" />
+                    </span>
                 </p>
+                
+                <p class="editable" @mouseenter="startEditing('location')" @mouseleave="stopEditing">
+                    <strong>Ubicación:</strong>
+                    <span v-if="editingField !== 'location'">{{ user.city }}, {{ user.country }}</span>
+                    <span v-else>
+                        <input v-model="user.city" class="form-control mb-1" placeholder="Ciudad" />
+                        <input v-model="user.country" class="form-control" placeholder="País" />
+                    </span>
+                </p>
+                
+                <p v-if="user.biography" class="editable" @mouseenter="startEditing('biography')" @mouseleave="stopEditing">
+                    <strong>Mi carta de presentación:</strong><br />
+                    <span v-if="editingField !== 'biography'" class="biography-text">{{ user.biography }}</span>
+                    <span v-else><textarea v-model="user.biography" class="form-control" rows="4"></textarea></span>
+                </p>
+                
                 <a 
                     v-if="user.cv" 
                     :href= "`http://localhost:8000/uploads/cvs/${user.cv}`" 

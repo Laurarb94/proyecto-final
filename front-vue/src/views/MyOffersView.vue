@@ -1,103 +1,88 @@
-<script>
-import AppliedOffersComponent from '@/components/AppliedOffersComponent.vue';
-import applicationService from '@/services/applicationService';
-import UserCoursesComponent from '@/components/UserCoursesComponent.vue';
-import courseService from '@/services/courseService';
-import Swal from 'sweetalert2';
+<script setup>
+import { ref, onMounted } from 'vue'
+import AppliedOffersComponent from '@/components/AppliedOffersComponent.vue'
+import UserCoursesComponent from '@/components/UserCoursesComponent.vue'
+import applicationService from '@/services/applicationService'
+import courseService from '@/services/courseService'
+import Swal from 'sweetalert2'
 
-export default {
-    components: { 
-      AppliedOffersComponent,
-      UserCoursesComponent
-    },
 
-    data(){
-        return {
-            appliedOffers: [],
-            enrrolledCourses: [],
-            currentOfferIndex: 0,
-            currentCourseIndex: 0,
-            userId: null 
-        };
-    },
+// Estado reactivo
+const appliedOffers = ref([])
+const enrrolledCourses = ref([])
+const currentOfferIndex = ref(0)
+const currentCourseIndex = ref(0)
+const userId = ref(null)
 
-    async created() {
-      this.userId = parseInt(localStorage.getItem('userId'));
-      
-      try {
-        const response = await applicationService.getUserApplications(this.userId);
-        this.appliedOffers = response.data || [];
-        
-        if (this.appliedOffers.length > 0) {
-          this.currentOfferIndex = 0;
-        } else {
-          this.currentOfferIndex = -1;
-        }
-        
-        console.log('Ofertas aplicadas:', this.appliedOffers);
-      } catch (error) {
-        console.error('Error al obtener las aplicaciones:', error);
-      }
 
-      try {
-        const response = await courseService.getUserCourses(this.userId);
-        this.enrrolledCourses = response.data || [];
-      } catch (error) {
-        console.log('Error al obtener los cursos: ', error);
-      }
-    
-    },
+// Métodos
+function prevOffer() {
+  if (currentOfferIndex.value > 0) currentOfferIndex.value--
+}
 
-    methods: {
-      prevOffer(){
-        if(this.currentOfferIndex > 0) this.currentOfferIndex--;
-      }, 
+function nextOffer() {
+  if (currentOfferIndex.value < appliedOffers.value.length - 1) currentOfferIndex.value++
+}
 
-      nextOffer(){
-        if (this.currentOfferIndex < this.appliedOffers.length - 1) this.currentOfferIndex++;
-      },
+function prevCourse() {
+  if (currentCourseIndex.value > 0) currentCourseIndex.value--
+}
 
-      prevCourse(){
-        if(this.currentCourseIndex > 0) this.currentCourseIndex--;
-      },
+function nextCourse() {
+  if (currentCourseIndex.value < enrrolledCourses.value.length - 1) currentCourseIndex.value++
+}
 
-      nextCourse(){
-        if(this.currentCourseIndex < this.enrrolledCourses.length -1) this.currentCourseIndex++;
-      },
+async function removeApplication(offerId) {
+  const result = await Swal.fire({
+    title: '¿Estás seguro?',
+    text: '¿Quieres cancelar tu postulación a esta oferta?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, cancelar',
+    cancelButtonText: 'No, mantener',
+    reverseButtons: true
+  })
 
-      async removeApplication(offerId){
-      const result = await Swal.fire({
-        title: '¿Estás seguro',
-        text: '¿Quieres cancelar tu postulación a esta oferta?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Sí, cancelar',
-        cancelButtonText: 'No, mantener',
-        reverseButtons: true
-      });
+  if (result.isConfirmed) {
+    appliedOffers.value = appliedOffers.value.filter(o => o.id !== offerId)
+    localStorage.setItem('appliedOffers', JSON.stringify(appliedOffers.value))
+    if (currentOfferIndex.value >= appliedOffers.value.length) {
+      currentOfferIndex.value = Math.max(appliedOffers.value.length - 1, 0)
+    }
 
-      if(result.isConfirmed){
-        this.appliedOffers = this.appliedOffers.filter(o => o.id !== offerId);
-        localStorage.setItem('appliedOffers', JSON.stringify(this.appliedOffers));
-          if(this.currentOfferIndex >= this.appliedOffers.length){
-            this.currentOfferIndex = Math.max(this.appliedOffers.length -1, 0);
-          }
+    Swal.fire(
+      'Postulación cancelada!',
+      'Te has desinscrito de la oferta correctamente',
+      'success'
+    )
+  }
+}
 
-          Swal.fire(
-            'Postulación cancelada!',
-            'Te has desinscrito de la oferta correctamente',
-            'success'
-          );
-      }
+// Carga inicial
+onMounted(async () => {
+  userId.value = parseInt(localStorage.getItem('userId'))
 
-    },
+  try {
+    const response = await applicationService.getUserApplications(userId.value)
+    appliedOffers.value = response.data || []
+    currentOfferIndex.value = appliedOffers.value.length > 0 ? 0 : -1
+    console.log('Ofertas aplicadas:', appliedOffers.value)
+  } catch (error) {
+    console.error('Error al obtener las aplicaciones:', error)
+  }
 
-    },
+  try {
+    const response = await courseService.getUserCourses(userId.value)
+    enrrolledCourses.value = response.data || []
+  } catch (error) {
+    console.error('Error al obtener los cursos:', error)
+  }
+})
 
-};
 </script>
 
 <template>
+
 <div class="container">
    <h2 class="title">Mis ofertas de empleo</h2>
    <AppliedOffersComponent
@@ -116,7 +101,6 @@ export default {
       @next-course="nextCourse"
    />
 </div>
-
 
 </template>
 

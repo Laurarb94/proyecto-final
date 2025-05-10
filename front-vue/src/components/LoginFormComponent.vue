@@ -1,69 +1,59 @@
-<script>
-import { useAuth } from '@/composables/useAuth';
-import { loginUser } from '../services/authService'; // Importa el servicio
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useAuth } from '@/composables/useAuth'
+import { loginUser } from '@/services/authService'
 
-export default {
-  data() {
-    return {
-      email: '',
-      password: '',
-      errorMessage: '',
-      fromRegistration: false //variable que controla el mensaje
-    };
-  },
-  created(){
-    //verificar si vienes del registro
-    const fromRegistration = this.$route.query.fromRegistration;
-    if(fromRegistration){
-      this.fromRegistration = true;
-    }
-  },
+const email = ref('')
+const password = ref('')
+const errorMessage = ref('')
+const fromRegistration = ref(false)
 
-  methods: {
-    async handleLogin() {
-      if(!this.email || !this.password){
-        this.errorMessage = "Por favor, ingresa un correo y contraseña válido";
-        return;
-      }
+const route = useRoute()
+const router = useRouter()
 
-      try {
-        // Llamamos al servicio de login
-        const response = await loginUser(this.email, this.password);
-        console.log("Login exitoso:", response);
-
-        //Usar el composable useAuth para actualizar el estado global
-        const { login } = useAuth();
-        login(response.id, response.token, response.role); //establecer estado global con el id y el token
-
-        //Decodificar el token JWT para obtener los datos del usuario
-        const tokenPayLoad = JSON.parse(atob(response.token.split('.')[1]));
-        console.log('Token Payload: ', tokenPayLoad);
-
-        //verificar el rol del usuario
-        const userRole = tokenPayLoad.role; 
-        console.log('User Role: ', userRole);
-
-        //Guardar rol en localStorage
-        localStorage.setItem('userRole', userRole);
-
-        if(userRole === 'ROLE_USER' || userRole === 'ROLE_ADMIN'){
-          this.$router.push('/dashboardUser');
-        }else if(userRole === 'ROLE_COMPANY'){
-          this.$router.push('/dashboardCompany');
-        }else{
-          //manejar casos de error
-          console.log('Error: rol desconocido');
-          this.$router.push('/api/login');
-        }
-
-      } catch (error) {
-        // Si ocurre un error, mostrar un mensaje
-        console.error("Error de login:", error);
-        this.errorMessage = 'Email o contraseña incorrectos';
-      }
-    }
+onMounted(() => {
+  if(route.query.fromRegistration){
+    fromRegistration.value = true
   }
-};
+})
+
+async function handleLogin() {
+  if (!email.value || !password.value) {
+    errorMessage.value = 'Por favor, ingresa un correo y contraseña válido'
+    return
+  }
+
+  try {
+    const response = await loginUser(email.value, password.value)
+    console.log('Login exitoso:', response)
+
+    const { login } = useAuth()
+    login(response.id, response.token, response.role)
+
+    const tokenPayload = JSON.parse(atob(response.token.split('.')[1]))
+    console.log('Token Payload:', tokenPayload)
+
+    const userRole = tokenPayload.role
+    console.log('User Role:', userRole)
+
+    localStorage.setItem('userRole', userRole)
+
+    if (userRole === 'ROLE_USER' || userRole === 'ROLE_ADMIN') {
+      router.push('/dashboardUser')
+    } else if (userRole === 'ROLE_COMPANY') {
+      router.push('/dashboardCompany')
+    } else {
+      console.log('Error: rol desconocido')
+      router.push('/api/login')
+    }
+
+  } catch (error) {
+    console.error('Error de login:', error)
+    errorMessage.value = 'Email o contraseña incorrectos'
+  }
+}
+
 </script>
 
 <template>

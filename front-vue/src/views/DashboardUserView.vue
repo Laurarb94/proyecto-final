@@ -1,4 +1,226 @@
-<script>
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import Swal from 'sweetalert2'
+
+import { logoutUser } from '@/services/authService'
+import { getUserById } from '@/services/userService'
+import jobOfferService from '@/services/jobOfferService'
+import categoryService from '@/services/categoryService'
+import applicationService from '@/services/applicationService'
+import courseService from '@/services/courseService'
+
+import UserComponent from '@/components/UserComponent.vue'
+import UserCoursesComponent from "@/components/UserCoursesComponent.vue"
+import UserMessagesComponent from "@/components/UserMessagesComponent.vue"
+import ProfileCardComponent from '@/components/ProfileCardComponent.vue'
+import CategoryFilterComponent from '@/components/CategoryFilterComponent.vue'
+import AppliedOffersComponent from '@/components/AppliedOffersComponent.vue'
+import OfferListComponent from '@/components/OfferListComponent.vue'
+
+const router = useRouter()
+
+// Estado
+const user = ref({})
+const offers = ref([])
+const categories = ref([])
+const subcategories = ref([])
+const selectedSubcategory = ref(null)
+const selectedSubcategoryId = ref(null)
+const filteredOffers = ref([])
+const filteredCourses = ref([])
+const appliedOffers = ref([])
+const appliedCourses = ref([])
+const courses = ref([])
+const userId = ref(null)
+
+const currentView = ref('offers')
+const searchQuery = ref('')
+const currentPage = ref(1)
+const totalPages = ref(1)
+
+// Computado
+const isAdmin = computed(() => {
+  const role = localStorage.getItem('userRole')
+  return role === 'ROLE_ADMIN'
+})
+
+// Ciclo de vida
+onMounted(async () => {
+  await fetchUserData()
+  await fetchCategories()
+  await fetchOffers()
+})
+
+// Métodos
+async function fetchUserData() {
+  try {
+    const id = localStorage.getItem('userId')
+    if (id) {
+      userId.value = parseInt(id)
+      user.value = await getUserById(userId.value)
+      const storedApplications = localStorage.getItem('appliedOffers')
+      if (storedApplications) {
+        appliedOffers.value = JSON.parse(storedApplications)
+      } else {
+        await fetchApplications()
+      }
+    }
+  } catch (error) {
+    console.error('Error al obtener datos del usuario:', error)
+  }
+}
+
+async function fetchCategories() {
+  try {
+    categories.value = await categoryService.getAll()
+  } catch (error) {
+    console.error('Error al obtener categorías:', error)
+  }
+}
+
+async function fetchOffers() {
+  try {
+    offers.value = await jobOfferService.getAll()
+  } catch (error) {
+    console.error('Error al obtener ofertas:', error)
+  }
+}
+
+function selectSubcategory(subcategory) {
+  selectedSubcategory.value = subcategory.name || subcategory
+  selectedSubcategoryId.value = subcategory.id
+  fetchFilteredOffers()
+  fetchFilteredCourses()
+}
+
+function clearFilter() {
+  selectedSubcategory.value = null
+  selectedSubcategoryId.value = null
+  filteredOffers.value = []
+  filteredCourses.value = []
+}
+
+async function fetchFilteredOffers() {
+  try {
+    const allOffers = await jobOfferService.getAll()
+    filteredOffers.value = allOffers.filter(offer =>
+      offer.subcategory && offer.subcategory.id === selectedSubcategoryId.value
+    )
+  } catch (error) {
+    console.error('Error al filtrar ofertas:', error)
+  }
+}
+
+async function fetchFilteredCourses() {
+  try {
+    const allCourses = await courseService.getAll()
+    courses.value = allCourses
+    filteredCourses.value = allCourses.filter(course =>
+      course.subcategory === selectedSubcategory.value
+    )
+  } catch (error) {
+    console.error('Error al filtrar cursos:', error)
+  }
+}
+
+function handleApplyOffer(offerId) {
+  const offerToApply = offers.value.find(offer => offer.id === offerId)
+  if (offerToApply) {
+    applyToOffer(offerId)
+  }
+}
+
+async function applyToOffer(offerId) {
+  try {
+    await applicationService.applyToOffer(offerId, userId.value)
+    const applied = offers.value.find(offer => offer.id === offerId)
+    if (applied) {
+      appliedOffers.value.push(applied)
+      offers.value = offers.value.filter(offer => offer.id !== offerId)
+      localStorage.setItem('appliedOffers', JSON.stringify(appliedOffers.value))
+    }
+
+    Swal.fire({
+      icon: 'success',
+      title: '¡Postulación exitosa!',
+      text: '¿Qué te gustaría hacer ahora?',
+      showCancelButton: true,
+      confirmButtonText: 'Ver mis ofertas',
+      cancelButtonText: 'Seguir navegando',
+      reverseButtons: true
+    }).then(result => {
+      if (result.isConfirmed) router.push({ name: 'myOffers' })
+    })
+  } catch (error) {
+    Swal.fire('Error', 'Hubo un problema al postularte', 'error')
+  }
+}
+
+async function handleApplyCourse(courseId) {
+  try {
+    await courseService.applyToCourse(courseId, userId.value)
+    const applied = courses.value.find(course => course.id === courseId)
+    if (applied) {
+      appliedCourses.value.push(applied)
+      courses.value = courses.value.filter(course => course.id !== courseId)
+      filteredCourses.value = filteredCourses.value.filter(course => course.id !== courseId)
+      localStorage.setItem('appliedCourses', JSON.stringify(appliedCourses.value))
+    }
+
+    Swal.fire({
+      icon: 'success',
+      title: '¡Inscripción exitosa!',
+      text: '¿Qué te gustaría hacer ahora?',
+      showCancelButton: true,
+      confirmButtonText: 'Ver mis cursos',
+      cancelButtonText: 'Seguir explorando',
+      reverseButtons: true
+    }).then(result => {
+      if (result.isConfirmed) router.push({ name: 'myCourses' })
+    })
+  } catch (error) {
+    Swal.fire('Error', 'Hubo un problema al inscribirte', 'error')
+  }
+}
+
+async function logout() {
+  try {
+    await logoutUser()
+    localStorage.removeItem('token')
+    localStorage.removeItem('userId')
+    localStorage.removeItem('appliedOffers')
+    router.push('/')
+  } catch (error) {
+    console.error('Error en logout:', error)
+  }
+}
+
+function goToProfile() {
+  if (user.value) {
+    router.push({ name: 'profile', params: { userId: user.value.id } })
+  } else {
+    console.error('No se pudo encontrar al usuario')
+  }
+}
+
+function goToOffers() {
+  router.push({ name: 'myOffers' })
+}
+
+function goToCourses() {
+  router.push({ name: 'myCourses' })
+}
+
+function goToMessages() {
+  router.push({ name: 'messages' })
+}
+
+
+
+
+
+/*<script> ESTO ES VUE 2!! 
 import { logoutUser } from '@/services/authService';
 import { getUserById } from '@/services/userService';
 import { useAuth } from '@/composables/useAuth';
@@ -323,7 +545,7 @@ export default {
 
 };
 
-
+*/
 </script>
 
 <template>

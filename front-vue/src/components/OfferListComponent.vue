@@ -1,14 +1,20 @@
-<script>
-export default {
-  props: {
-    offers: Array
-  },
-  methods: {
-    applyToOffer(offerId) {
-      this.$emit('apply-offer', offerId);
-    }
+<script setup>
+import { defineProps, defineEmits } from 'vue'
+
+const props = defineProps({
+  offers: {
+    type: Array, 
+    required: true
   }
-};
+})
+
+const emit = defineEmits(['apply-offer'])
+
+function applyToOffer(offerId) {
+  emit('apply-offer', offerId)
+}
+
+
 </script>
 
 <template>

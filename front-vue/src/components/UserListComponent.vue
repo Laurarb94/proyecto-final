@@ -1,38 +1,28 @@
-<script>
-import messageService from '@/services/messageService';
+<script setup>
+import { ref, computed } from 'vue'
 
-export default {
-    props: {
-        users: Array
-    },
+const props = defineProps({
+    users: Array
+})
 
-    emits: ['select-user'],
+const emit = defineEmits(['select-user'])
 
-    data(){
-        return {
-            searchTerm: '', //para la barra de búsqueda
-        };
-    },
+const searchTerm = ref('')
 
-    computed: {
-        //filtrar usuarios según la barra de búsqueda
-        filteredUsers(){
-            if(!this.searchTerm.trim()) return this.users; //si la barra está vacía no muestra nada
-            return this.localUsers.filter(user=>{
-                return user.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-                       user.email.toLowerCase().includes(this.searchTerm.toLocaleLowerCase());
-            });
-        }
-    },
+//computed para filtrar usuarios según la búsuqeda
+const filteredUsers = computed(() => {
+  if (!searchTerm.value.trim()) return props.users
+  return props.users.filter(user =>
+    user.name.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
+    user.email.toLowerCase().includes(searchTerm.value.toLowerCase())
+  )
+})
 
-    methods: {
-        selectUser(user){
-            this.$emit('select-user', user); //emitir el evento selectuser
-        }
-    }
+//emitir al usuario seleccionado
+function selectUser(user) {
+    emit('select-user', user)
+}
 
-
-};
 
 </script>
 
