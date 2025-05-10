@@ -1,71 +1,44 @@
-<script>
-import UserListComponent from '@/components/UserListComponent.vue';
-import UserMessagesComponent from '@/components/UserMessagesComponent.vue';
-import messageService from '@/services/messageService';
+<script setup>
+//Organiza la página de los mensajes: búsqueda a la izq y chat a la derecha cuando se selecciona usu
+import { ref, onMounted } from 'vue'
+import UserListComponent from '@/components/UserListComponent.vue'
+import UserMessagesComponent from '@/components/UserMessagesComponent.vue'
+import { getUsers } from '@/services/userService'
 
-export default{
-    name: 'MessagesView',
-    components: {
-        UserMessagesComponent,
-        UserListComponent
-    },
+const selectedUserId = ref(null);
+const listaUsuarios = ref([])
 
-    data(){
-        return {
-            selectedUser: null,
-            users: []
-        };
-    },
+onMounted(async() => {
+    //llamar al servicio para cargar usuarios
+    const res = await getUsers()
+    listaUsuarios.value = res
+})
 
-    async mounted() {
-        try {
-            const allUsers = await messageService.getUsers(); // Obtienes los usuarios
-            this.users = allUsers; // Guardas los usuarios en el 'data'
-        } catch (error) {
-            console.error('Error al cargar los usuarios:', error);
-        }
-    },
+//Función para seleccoinar usuarios desde la list
+function handleUserSelect(user){
+    selectedUserId.value = user.id
+}
 
-    methods: {
-        handleUserSelection(user){
-            console.log('Usuario seleccionado: ', user);
-            this.selectedUser = user; //establece el usuario seleccionado
-        }
-    }
-};
+
+
 </script>
 
 <template>
-    <div class="messages-view">
-        <h2>Tus Mensajes</h2>
-        <div class="messages-container">
-            <UserListComponent 
-                @select-user="handleUserSelection"
-                :users="users"  />
-            <!--Pasar userId solo si el selectedUser está disponible: -->
-            <UserMessagesComponent :userId="selectedUser ? selectedUser.id : null" />
-        </div>
+    <div class="message-page">
+        <!--Lista de usuario-->
+        <UserListComponent :users="listaUsuarios" @select-user="handleUserSelect" />
+
+        <!--Mensajes del usuario seleccionado-->
+        <UserMessagesComponent :user-id="selectedUserId" />
     </div>
 </template>
 
 <style scoped>
-.messages-view {
+.message-page{
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
+    gap: 40px;
+    padding: 40px;
+    flex-wrap: wrap;
 }
-
-.message-container{
-    display: flex;
-    width: 100%;
-}
-
-.user-list{
-    width: 300px;
-}
-
-.user-messages{
-    flex: 1;
-    pad: 20pxs;
-}
-
 </style>
