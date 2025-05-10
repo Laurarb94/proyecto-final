@@ -2,100 +2,69 @@
 import { ref, computed } from 'vue'
 
 const props = defineProps({
-    users: Array
+  users: {
+    type: Array,
+    required: true
+  }
 })
 
 const emit = defineEmits(['select-user'])
 
 const searchTerm = ref('')
 
-//computed para filtrar usuarios según la búsuqeda
+// computed para filtrar usuarios según la búsqueda
 const filteredUsers = computed(() => {
-  if (!searchTerm.value.trim()) return props.users
+  if (!searchTerm.value.trim()) return []
   return props.users.filter(user =>
     user.name.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
     user.email.toLowerCase().includes(searchTerm.value.toLowerCase())
   )
 })
 
-//emitir al usuario seleccionado
+// emitir al usuario seleccionado
 function selectUser(user) {
-    emit('select-user', user)
+  emit('select-user', user)
+  searchTerm.value = ''
 }
-
-
 </script>
 
 <template>
-    <div class="user-list">
-        <!-- Barra de búsqueda -->
-        <input 
-            v-model="searchTerm" 
-            type="text" 
-            placeholder="Buscar usuario..." 
-            class="search-bar"
-        />
+ <div class="user-list">
+    <input 
+      v-model="searchTerm" 
+      type="text" 
+      placeholder="Buscar usuario..."
+      class="search-bar"
+    />
 
-        <!-- Lista de usuarios filtrados -->
-        <div 
-            v-for="user in filteredUsers" 
-            :key="user.id" 
-            @click="selectUser(user)" 
-            class="user-item"
-        >
-            {{ user.name }} || {{ user.email }}
-        </div>
+    <div 
+      v-for="user in filteredUsers"
+      :key="user.id"
+      @click="selectUser(user)"
+      class="user-item"
+    >
+      {{ user.name }} || {{ user.email }}
     </div>
+  </div>
 </template>
 
 <style scoped>
 .user-list {
-   width: 300px;
-   margin-right: 20px;
-   padding: 10px;
+  width: 100%;
+  padding: 20px;
 }
-
-.search-bar{
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    font-size: 16px;
+.search-bar {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  font-size: 16px;
 }
-
-.user-cards{
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
+.user-item {
+  padding: 8px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
 }
-
-.user-card{
-    background-color: #f1f1f1;
-    padding: 10px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: 0.3s;
+.user-item:hover {
+  background-color: #f1f1f1;
 }
-
-.user-card:hover{
-    background-color: #e0e0e0;
-}
-
-.user-info{
-    display: flex;
-    align-items: center;
-}
-
-.user-avatar{
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    margin-right: 10px;
-}
-
-.user-info h4{
-    margin: 0;
-}
-
 </style>

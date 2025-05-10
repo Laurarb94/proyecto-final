@@ -2,7 +2,7 @@ import api from "./api";
 
 export default{
     async sendMessage(receiverId, content){
-        const response = await api.post('/message', {
+        const response = await api.post('/messages', {
             receiver_id: receiverId,
             content: content,
         });

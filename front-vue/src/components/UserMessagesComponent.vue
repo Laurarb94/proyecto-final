@@ -1,81 +1,92 @@
-<script>
-import messageService from "@/services/messageService";
+<script setup>
+import { ref, watch, onMounted } from 'vue'
+import messageService from '@/services/messageService'
 
-export default {
-    props: {
-        userId: {
-            type: Number,
-            required: false
+const props = defineProps({
+    userId: {
+        type: Number, 
+        required: false
+    }
+})
+
+const selectedUser = ref(null)
+const messageContent = ref('')
+const messages = ref([])
+
+//Cargar mensajes cuando cambia el userId
+watch(
+  () => props.userId, //cada vez que cambie el userId, activará newId
+  (newId) => { //es el nuevo valor de props.userid
+    console.log('nuevo userId recibido: ', newId)
+    if (newId) {
+      fetchMessages(newId)
+    }
+  },
+  { immediate: true } //hace que se ejecute al montar el componente si ya hay valor en userid
+)
+
+
+async function fetchMessages(userId){
+    console.log('Llamando a fetchMessage con userId: ', userId)
+    if(!userId) return 
+    try {
+        const conversation = await messageService.getConversation(userId)
+       
+        if (conversation.user) {
+            selectedUser.value = conversation.user
+            messages.value = conversation.messages || []
+        } else if (conversation.status === 'No hay mensajes en esta conversación') {
+            // fallback para conversaciones nuevas
+            selectedUser.value = props.userId ? { id: props.userId, name: '' } : null
+            messages.value = []
         }
-    },
 
-    data() {
-        return {
-            selectedUser: null,
-            messageContent: '',
-            messages: []
-        };
-    },
+    } catch (error) {
+        console.log('Error al cargar los mensajes: ', error)
+    }
+}
 
-    watch: {
-        userId(newId) {
-            if(newId){
-                this.fetchMessages(newId); //cuando se recibe un nuevo userId, obtener la conversación
-            }
-        }
-    },
-
-    methods: {
-        //método para obtener mensajes e la conversación con el usuario seleccionado
-        async fetchMessages(userId) {
-            if(!userId) return; //no hacer nada si no hay userId
-            try {
-                const conversation = await messageService.getConversation(userId);
-                this.messages = conversation.messages || [];
-                this.selectedUser = conversation.user || null; //asigna el usuario de la conversación
-            } catch (error) {
-                console.error('Error al cargar los mensajes:', error);
-            }
-        },
-
-        //Método para enviar un mensaje
-        sendMessage() {
-            if (this.messageContent.trim()) {
-                messageService.sendMessage(this.selectedUser.id, this.messageContent).then(() => {
-                    this.fetchMessages(this.selectedUser.id);  // Actualiza los mensajes después de enviar uno nuevo
-                    this.messageContent = '';  // Limpia el campo de mensaje
-                });
-            }
-        }
-    },
-
-    mounted() {
-        if (this.userId) {
-            this.fetchMessages(this.userId);
+async function sendMessage(){
+    if(messageContent.value.trim()){
+        try {
+            await messageService.sendMessage(selectedUser.value.id, messageContent.value)
+            console.log('Enviando mensaje a: ', selectedUser.value.id, "con contenido: ", messageContent.value)
+            await fetchMessages(selectedUser.value.id)
+            messageContent.value = ''
+        } catch (error) {
+            console.log('Error al enviar el mensaje: ', error)
         }
     }
-};
+}
+
+
 </script>
 
 <template>
-    <div class="user-messages">
-        <h3>Conversación con: {{ selectedUser ? selectedUser.name : 'Nadie' }}</h3>
-        <div v-if="selectedUser">
-            <div class="message-area">
-                <!--Aquí irán los mensajes-->
-                <div v-for="message in messages" :key="message.id" class="message">
-                    <p><strong>{{ message.sender.name }}</strong>
-                        {{ messageContent }}
-                    </p>
-                </div>
-                <textarea v-model="messageContent" placeholder="Escribe tu mensaje..." class="message-input"></textarea>
-                <button @click="sendMessage" class="send-button">Enviar</button>
-            </div>
+   <div class="user-messages">
+    <h3>Conversación con: {{ selectedUser ? selectedUser.name : 'Nadie' }}</h3>
+
+    <div v-if="selectedUser">
+      <div class="message-area">
+        <!-- Mensajes existentes -->
+        <div v-for="msg in messages" :key="msg.id" class="message">
+          <p><strong>{{ msg.sender.name }}:</strong> {{ msg.content }}</p>
         </div>
-        <div v-else>
-            <p>Selecciona un usuario para comenzar la conversación</p>
-        </div>
+      </div>
+
+      <!-- Campo para escribir -->
+      <textarea
+        v-model="messageContent"
+        placeholder="Escribe tu mensaje..."
+        class="message-input"
+      ></textarea>
+      <button @click="sendMessage" class="send-button">Enviar</button>
     </div>
+
+    <div v-else>
+      <p>Selecciona un usuario para comenzar la conversación</p>
+    </div>
+  </div>
 </template>
   
 

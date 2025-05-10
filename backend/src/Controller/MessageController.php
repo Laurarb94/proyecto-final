@@ -144,8 +144,14 @@ final class MessageController extends AbstractController
                 'id' => $msg->getId(),
                 'content' => $msg->getContent(),
                 'sentAt' => $msg->getSentAt()->format('Y-m-d H:i:s'),
-                'sender' => $msg->getSender()->getName(), 
-                'receiver' => $msg->getReceiver()->getName() 
+                'sender' => [
+                    'id' => $msg->getSender()->getId(), //hay que pasarle el id para el front!!
+                    'name' => $msg->getSender()->getName()
+                ],
+                'receiver' => [
+                    'id' => $msg->getSender()->getId(), //id para front!!
+                    'name' => $msg->getSender()->getName()
+                ],
             ];
         }, $messages);
         
@@ -155,7 +161,15 @@ final class MessageController extends AbstractController
         }
         
         // Devolver los mensajes serializados
-        return new JsonResponse($serialized);
+       // return new JsonResponse($serialized);
+
+       return new JsonResponse([
+            'user' => [
+            'id' => $otherUser->getId(),
+            'name' => $otherUser->getName()
+        ], 'messages' => $serialized
+    ]);
+
     }
 
 
