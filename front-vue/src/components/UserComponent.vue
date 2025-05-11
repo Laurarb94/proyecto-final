@@ -2,6 +2,7 @@
 import { ref, onMounted, computed} from 'vue';
 import { useRouter } from 'vue-router'; 
 import { getUsers, deleteUser, } from '@/services/userService';
+import Swal from 'sweetalert2';
 
 
 const router = useRouter(); 
@@ -29,14 +30,28 @@ const handleEditUser = async (userId) =>{
 }
 
 //Eliminar a un usuario:
-const handleDeleteUser = async (userId) =>{
-    try{
-        await deleteUser(userId); //llamas al servicio de eliminar
-        users.value = users.value.filter(user => user.id !== userId); //después de eliminar al usuario, recargas lalista de usuarios
-    }catch(error){
-        console.log("Error al eliminar al usuario: ", error);
+const handleDeleteUser = async (userId) => {
+  const result = await Swal.fire({
+    title: '¿Estás seguro?',
+    text: 'Esta acción eliminará al usuario permanentemente.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar',
+    reverseButtons: true
+  });
+
+  if (result.isConfirmed) {
+    try {
+      await deleteUser(userId);
+      users.value = users.value.filter(user => user.id !== userId);
+      Swal.fire('Eliminado', 'El usuario ha sido eliminado.', 'success');
+    } catch (error) {
+      Swal.fire('Error', 'No se pudo eliminar el usuario.', 'error');
     }
-}
+  }
+};
+
 
 //Filtro de búsqueda
 const filteredUsers = computed(()=>{
@@ -56,7 +71,7 @@ const filteredUsers = computed(()=>{
         <div class="card shadow-sm">
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Gestión de usuarios</h5>
-                <button @click="handleCreateUser" class="btn btn-light btn-sm">
+                <button @click="handleCreateUser" class="btn btn-light btn-sm rounded-pill">
                     <font-awesome-icon icon="plus" /> Añadir usuario
                 </button>
             </div>
@@ -109,8 +124,47 @@ const filteredUsers = computed(()=>{
 </template>
 
 <style scoped>
-.table th, .table td {
-     vertical-align: middle;
+.card{
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.card-header{
+    background-color: #6c63ff;
+    color: white;
+    font-weight: 600;
+}
+
+.card-body{
+    background-color: #f9f9f9;
+}
+
+.table th,
+.table td {
+    vertical-align: middle;
+    font-size: 0.95rem;
+}
+
+.btn-outline-warning,
+.btn-outline-danger {
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+}
+
+.btn-outline-warning:hover{
+    background-color: #ffc107;
+    color: black;
+}
+
+.btn-outline-danger:hover{
+    background-color: #dc3545;
+    color: white;
+}
+
+inout.form-control{
+    border-radius: 20px;
 }
 
 </style>

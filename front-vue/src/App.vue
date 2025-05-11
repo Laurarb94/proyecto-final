@@ -15,7 +15,7 @@ const handleLogout = () => {
 </script>
 
 <template>
-  <div>
+  <div class="layout-wrapper">
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
       <div class="container">
@@ -44,7 +44,7 @@ const handleLogout = () => {
     <RouterView />
 
     <!-- Footer -->
-    <footer class="bg-dark text-white text-center py-4 mt-5">
+    <footer class="footer">
       <p>© 2025 Mi TFG - Todos los derechos reservados</p>
     </footer>
     
@@ -59,6 +59,11 @@ body {
   font-family: 'Roboto', sans-serif;
 }
 
+.layout-wrapper{
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
 
 .navbar{
   background-color: #f8f9fa;
@@ -81,15 +86,12 @@ body {
   color: #007bff;
 }
 
-footer{
+footer.footer{
   background-color: #343a40;
   color: white;
   text-align: center;
   padding: 20px 0;
-
-  position: relative;
-  bottom: 0;
-  width: 100%;
+  margin-top: auto;
 }
 
 

@@ -18,6 +18,7 @@ onMounted(() => {
   }
 })
 
+
 async function handleLogin() {
   if (!email.value || !password.value) {
     errorMessage.value = 'Por favor, ingresa un correo y contraseña válido'

@@ -64,7 +64,7 @@ function goBack() {
         <!--card de la oferta-->
         <div class="offer-card w-75 mx-auto">
             <div v-if="appliedOffers[currentOfferIndex]" 
-                :key="appliedOffers[currentOfferIndex].id"
+                :key="appliedOffers[currentOfferIndex].jobOffer.id"
                 class="card-body position-relative">
             <h5 class="card-title">{{ appliedOffers[currentOfferIndex].jobOffer.title }}</h5>
             <p class="card-text">{{ appliedOffers[currentOfferIndex].jobOffer.description }}</p>
@@ -74,7 +74,7 @@ function goBack() {
             <!--Botón eliminar oferta-->
             <button
                 class="btn btn-danger position-absolute top-0 end-0 m-2"
-                @click="removeApplication(appliedOffers[currentOfferIndex].id)">
+                @click="removeApplication(appliedOffers[currentOfferIndex].jobOffer.id)">
                 <font-awesome-icon :icon="['fas', 'trash']" />
             </button>
         </div>
@@ -89,16 +89,16 @@ function goBack() {
         <font-awesome-icon :icon="['fas', 'chevron-right']" />
     </button>
     </div>
-
-    <div class="card-footer text-center mt-4">
-      <button @click="goBack" class="btn btn-secondary">Volver</button>
-    </div>
-
 </div>
+
 
 <!--Mensjae si aún no hay ofertas-->
 <div v-else class="text-center py-4">
     <p class="text-muted">Todavía no tienes ninguna postulación activa</p>
+</div>
+
+<div class="card-footer text-center mt-4">
+      <button @click="goBack" class="btn btn-secondary">Volver</button>
 </div>
 
 </template>

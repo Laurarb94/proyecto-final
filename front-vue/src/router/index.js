@@ -17,7 +17,7 @@ import UserMessagesComponent from "@/components/UserMessagesComponent.vue";
 
 const routes = [
     { path: "/", component: HomeView, name: "home" },
-    { path: "/users", component: UserView, name: "users" },
+    { path: "/users", component: UserView, name: "users", meta: {requiresAuth: true, requiresAdmin: true} },
     { path: "/create", component: EditUserFormComponent, name: "createUser"},
     { path: "/edit/:id", component: EditUserFormComponent, name: "editUser"},
     { path: "/registerUser", component: RegistrationFormComponent, name: "registrationUser"},
@@ -41,14 +41,23 @@ const router = createRouter({
 //Glocal Guard para rutas protegidas:
 router.beforeEach((to, from, next)=>{
   const requiresAuth = to.matched.some(record=> record.meta.requiresAuth);
+  const requiresAdmin = to.matched.some(record=> record.meta.requiresAdmin);
   const token = localStorage.getItem("token");
+  const userRole = localStorage.getItem('userRole');
 
-  //Si la ruta require autenticación y no hay token, redirige al login
+  //Si la ruta require autenticación y no hay token, redirigir al login
   if(requiresAuth && !token){
-    next({ name: "login"});
-  }else{ //si sí que hay token, sigue con la navegación
-    next();
+    return next({ name: "login"})
   }
+
+  //Si require ser admin y el rol no es admin redirigir al dashbard normal
+  if(requiresAdmin && userRole !== 'ROLE_ADMIN'){
+    return next({ name: "dashboardUser"})
+  }
+
+  //Si todo  va bien, permitir navegación
+  next();
+
 });
 
 export default router;

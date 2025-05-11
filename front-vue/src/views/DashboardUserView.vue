@@ -9,6 +9,7 @@ import jobOfferService from '@/services/jobOfferService'
 import categoryService from '@/services/categoryService'
 import applicationService from '@/services/applicationService'
 import courseService from '@/services/courseService'
+import { useAuth } from '@/composables/useAuth'
 
 import UserComponent from '@/components/UserComponent.vue'
 import UserCoursesComponent from "@/components/UserCoursesComponent.vue"
@@ -19,6 +20,7 @@ import AppliedOffersComponent from '@/components/AppliedOffersComponent.vue'
 import OfferListComponent from '@/components/OfferListComponent.vue'
 
 const router = useRouter()
+const {role} = useAuth()
 
 // Estado
 const user = ref({})
@@ -39,11 +41,7 @@ const searchQuery = ref('')
 const currentPage = ref(1)
 const totalPages = ref(1)
 
-// Computado
-const isAdmin = computed(() => {
-  const role = localStorage.getItem('userRole')
-  return role === 'ROLE_ADMIN'
-})
+const isAdmin = computed(() => role.value === 'ROLE_ADMIN')
 
 // Ciclo de vida
 onMounted(async () => {
@@ -68,6 +66,15 @@ async function fetchUserData() {
     }
   } catch (error) {
     console.error('Error al obtener datos del usuario:', error)
+  }
+}
+
+async function fetchApplications(){
+  try {
+    const response = await applicationService.getUserApplications(userId.value)
+    appliedOffers.value = response.data || []
+  } catch (error) {
+    console.log('Error al obtener las aplicaciones: ', error)
   }
 }
 
@@ -216,336 +223,10 @@ function goToMessages() {
   router.push({ name: 'messages' })
 }
 
+function goToAdminPanel(){
+  router.push({ name: 'users'})
+}
 
-
-
-
-/*<script> ESTO ES VUE 2!! 
-import { logoutUser } from '@/services/authService';
-import { getUserById } from '@/services/userService';
-import { useAuth } from '@/composables/useAuth';
-import jobOfferService from '@/services/jobOfferService';
-import categoryService from '@/services/categoryService';
-import UserComponent from '@/components/UserComponent.vue';
-import UserCoursesComponent from "@/components/UserCoursesComponent.vue";
-import UserMessagesComponent from "@/components/UserMessagesComponent.vue";
-import ProfileCardComponent from '@/components/ProfileCardComponent.vue';
-import CategoryFilterComponent from '@/components/CategoryFilterComponent.vue';
-import AppliedOffersComponent from '@/components/AppliedOffersComponent.vue';
-import applicationService from '@/services/applicationService';
-import Swal from 'sweetalert2';
-import OfferListComponent from '@/components/OfferListComponent.vue';
-import router from '@/router';
-import courseService from '@/services/courseService';
-
-
-export default {
-  name: 'DashboardUserView',
-
-  components: {
-    UserComponent,
-    AppliedOffersComponent,
-    CategoryFilterComponent,
-    OfferListComponent,
-    ProfileCardComponent,
-    UserCoursesComponent,
-    UserMessagesComponent,
-  },
-
-  props: {
-    offer: Object, 
-  },
-
-  data() {
-    return {
-      
-      user:{}, //inicializas como objeto vacío
-      offers: [], 
-      categories: [],
-      subcategories: [],
-      successMessage: '',
-      selectedSubcategory: null,
-      selectedSubcategoryId: null,
-      filteredOffers: [],
-      userId: null,    
-      currentView: 'offers', // Estado inicial, que indica que las ofertas se muestran al inicio
-      searchQuery: '', // Aquí se almacena la consulta de búsqueda
-      currentPage: 1, // Página actual para la paginación
-      totalPages: 1, // Total de páginas para la paginación
-      courses: [],
-      filteredCourses: [],
-      enrrolledCourses: [],
-      appliedCourses: [],
-      
-    };
-  },
-
-  created(){
-    this.fetchUserData(); //llamas a la función para que te devuleva los datos del usuario
-    this.fetchCategories();
-    this.fetchOffers(); 
-  },
-
-  computed: {
-      isAdmin() {
-        const role = localStorage.getItem('userRole'); //acceder al rol almacenado
-        return role === 'ROLE_ADMIN';
-      }
-  },
-
-  methods: {
-    // Método para cambiar la vista a 'profile'
-    goToProfile() {
-      // Verifica que el usuario esté cargado antes de redirigir
-      if (this.user) {
-        // Redirige con el parámetro 'user' a la vista del perfil
-        this.$router.push({ name: 'profile', params: { userId: this.user.id } });
-      } else {
-        console.error('No se pudo encontrar al usuario');
-      }
-    },
-
-    // Método para cambiar la vista a 'offers'
-    goToOffers() {
-      this.$router.push({ name: 'myOffers' });
-    },
-
-    // Método para cambiar la vista a 'courses'
-    goToCourses() {
-      this.$router.push({ name: "myCourses"});
-    },
-
-    // Método para cambiar la vista a 'messages'
-    goToMessages() {
-      this.$router.push({name: "messages"});
-    },
-
-    //Método para obtener los datos del usuario al hacer login
-    async fetchUserData() {
-      try{
-        const userId = localStorage.getItem('userId'); //obtienes el userId desde el localStorage
-        console.log('USER ID desde LOCALSTORAGE: ', userId);
-
-        if(userId){
-          this.userId = parseInt(userId);
-          this.user = await getUserById(userId);
-
-          //cargar las postulacionees guardas desde el localStorage
-          const storedApplications = localStorage.getItem('appliedOffers');
-          if(storedApplications){
-            this.appliedOffers = JSON.parse(storedApplications); //cargar desde el localStorage
-          }else{
-            await this.fetchApplications();
-          }
-          
-        }else{
-          console.log("Usuario no autenticado");
-        }
-      }catch(error){
-        console.log("Error al obtener los datos del usuario: ", error);
-      }
-    },
-
-     async fetchCategories(){
-      try {
-        this.categories = await categoryService.getAll();
-      } catch (error) {
-        console.log('Error al obtener las categorías: ', error);
-      }
-     },
-
-     async fetchOffers(){
-      try {
-        const response = await jobOfferService.getAll();
-        this.offers = response;
-      } catch (error) {
-        console.log('Error al obtener las ofertas: ', error);
-      }
-     },
-
-    selectSubcategory(subcategory){
-      this.selectedSubcategory = subcategory.name || subcategory;
-      this.selectedSubcategoryId = subcategory.id;
-      console.log('Subcategoría seleccionada: ', this.selectedSubcategory);
-      this.fetchFilteredOffers();
-      this.fetchFilteredCourses();
-    },
-
-    async fetchFilteredOffers(){
-      try {
-        const response = await jobOfferService.getAll();
-        this.filteredOffers = response.filter(offer =>
-          offer.subcategory && offer.subcategory.id === this.selectedSubcategoryId
-        );
-        console.log('Cursos filtrados: ', this.filteredCourses);
-      } catch (error) {
-        console.log('Error al filtrar las ofertas: ', error);
-      }
-    },
-
-    handleApplyOffer(offerId){
-      const offerToApply = this.offers.find(offer=>offer.id === offerId);
-      if(offerToApply){
-        this.apply(offerId);
-      }
-    },
-
-  async apply(offerId) {
-    try {
-      const response = await applicationService.applyToOffer(offerId, this.userId);
-
-      // Mover la oferta a "mis ofertas postuladas"
-      const appliedOffer = this.offers.find(offer => offer.id === offerId);
-      if (appliedOffer) {
-        this.appliedOffers.push(appliedOffer);
-        this.offers = this.offers.filter(offer => offer.id !== offerId);
-        localStorage.setItem('appliedOffers', JSON.stringify(this.appliedOffers));
-      }
-      
-      // Sweet Alert con opciones
-      Swal.fire({
-        icon: 'success',
-        title: '¡Postulación exitosa!',
-        text: '¿Qué te gustaría hacer ahora?',
-        showCancelButton: true,
-        confirmButtonText: 'Ver mis ofertas',
-        cancelButtonText: 'Seguir navegando',
-        reverseButtons: true
-      }).then(result => {
-        if (result.isConfirmed) {
-          this.$router.push({ name: 'myOffers' });
-        }
-        // Si pulsa cancelar, no hace nada y se queda en la misma página
-        });
-      } catch (error) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Hubo un problema al postularte',
-          confirmButtonText: 'Aceptar',
-        });
-      }
-    },
-
-    async handleApplyCourse(courseId) {
-  try {
-    // Aplica al curso
-    const response = await courseService.applyToCourse(courseId, this.userId);
-    console.log('Cursos inscritos:', this.appliedCourses);
-
-    if (Array.isArray(this.appliedCourses)) {
-      // Mover el curso a los cursos aplicados
-      const appliedCourse = this.courses.find(course => course.id === courseId);
-      if (appliedCourse) {
-        // Añadir a appliedCourses
-        this.appliedCourses.push(appliedCourse);
-        // Eliminar de la lista de cursos
-        this.courses = this.courses.filter(course => course.id !== courseId);
-        
-        // Si el curso estaba en filteredCourses, eliminarlo también de allí
-        this.filteredCourses = this.filteredCourses.filter(course => course.id !== courseId);
-
-        // Actualiza el localStorage con los cursos aplicados
-        localStorage.setItem('appliedCourses', JSON.stringify(this.appliedCourses));
-      }
-
-      // Sweet Alert con opciones
-      Swal.fire({
-        icon: 'success',
-        title: '¡Inscripción exitosa!',
-        text: '¿Qué te gustaría hacer ahora?',
-        showCancelButton: true,
-        confirmButtonText: 'Ver mis cursos',
-        cancelButtonText: 'Seguir explorando',
-        reverseButtons: true
-      }).then((result) => {
-        if (result.isConfirmed) {
-          this.$router.push({ name: 'myCourses' });
-        }
-      });
-
-    } else {
-      console.error('appliedCourses no es un array:', this.appliedCourses);
-    }
-  } catch (error) {
-    console.log(error);
-    Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: 'Hubo un problema al inscribirte',
-      confirmButtonText: 'Aceptar',
-    });
-  }
-},
-
-
-
-    async handleRemoveCourse(courseId) {
-        try {
-            const userId = this.userId;
-            const response = await courseService.removeFromCourse(userId, courseId); // Llamada para eliminar curso
-            console.log('Respuesta al eliminar curso:', response);
-
-            // Mensaje de éxito
-            Swal.fire(
-                '¡Eliminado!',
-                'El curso ha sido eliminado de tus inscripciones.',
-                'success'
-            );
-
-            // Actualiza la lista de cursos o realiza cualquier otra acción
-            this.enrrolledCourses = this.enrrolledCourses.filter(course => course.id !== courseId); // Actualiza el listado de cursos
-        } catch (error) {
-            console.error('Error al eliminar el curso:', error);
-            Swal.fire(
-                'Error',
-                'Hubo un problema al eliminar el curso. Intenta nuevamente.',
-                'error'
-            );
-        }
-    },
-    
-    clearFilter(){
-      this.selectedSubcategory = null;
-      this.selectedSubcategoryId = null;
-      this.filteredOffers = [];
-      this.filteredCourses = [];
-    },
-
-    async fetchFilteredCourses() {
-      try {
-        const response = await courseService.getAll();
-        this.courses = response;
-        const filtered = response.filter(course => course.subcategory === this.selectedSubcategory); // Hacer una copia explícita de los cursos antes de filtrarlos
-        this.filteredCourses = [...filtered]; // Asegúrate de que filteredCourses se actualice correctamente
-      } catch (error) {
-        console.log('Error al filtrar los cursos: ', error);
-      }
-    },
-
-    async logout(){
-      try{
-        //llamar al servicio del logout
-        await logoutUser();
-
-        //Limpiar el localStorage:
-       // localStorage.removeItem("id");
-        localStorage.removeItem("token");
-        localStorage.removeItem('userId');
-        localStorage.removeItem('appliedOffers'); // Limpiar las postulaciones
-
-        //Redirigir a la página principal
-        this.$router.push("/");
-      }catch(error){
-        console.log("Error al hacer el logout: ", error);
-      }
-    }
-
-  }, //cierre de los métodos
-
-};
-
-*/
 </script>
 
 <template>
@@ -612,6 +293,9 @@ export default {
       <button class="btn btn-secondary" @click="goToOffers">Ofertas de Empleo</button>
       <button class="btn btn-secondary" @click="goToCourses">Mis Cursos</button>
       <button class="btn btn-secondary" @click="goToMessages">Mensajes</button>
+
+      <!--Solo si es admin-->
+      <button v-if="isAdmin" class="btn btn-secondary" @click="goToAdminPanel">Panel de administrador</button>
     </div>
 
   </div>
@@ -794,6 +478,4 @@ export default {
     transform: translateY(0);
   }
 }
-
-
 </style>
