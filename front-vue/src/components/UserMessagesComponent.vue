@@ -64,7 +64,7 @@ async function sendMessage(){
 
 <template>
    <div class="user-messages">
-    <h3>Conversación con: {{ selectedUser ? selectedUser.name : 'Nadie' }}</h3>
+    <h3>Conversación con: {{ selectedUser ? selectedUser.name : '' }}</h3>
 
     <div v-if="selectedUser">
       <div class="message-area">
