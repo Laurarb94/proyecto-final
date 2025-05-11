@@ -55,35 +55,44 @@ async function handleLogin() {
   }
 }
 
+function goBack(){
+  router.go(-1)
+}
+
 </script>
 
 <template>
-  <div class="container d-flex flex-column min-vh-100">
-      <h2 class="mt-4 text-center mx-auto">Loguéate</h2>
-     
-      <!--Si viene del registro, mostrar mensaje para terminar de registrarse-->
-      <div v-if="fromRegistration" class="alert alert-info text-center">
-        <strong>¡Bienvenido/a!</strong>Para finalizar tu registro, por favor inicia sesión.
+<div class="container d-flex align-items-center min-vh-100 fade-in">
+    <div class="row justify-content-center w-100">
+      <div class="col-md-5 d-flex align-items-center">
+        <img src="../assets/images/login.png" alt="Imagen Login" class="img-fluid login-img">
       </div>
-
-    <div class="d-flex justify-content-center flex-grow-1">
-      <div class="card shadow-sm p-4">
-
-        <form @submit.prevent="handleLogin">
-          <div class="mb-3">
-            <input v-model="email" type="email" placeholder="Email" class="form-control" required />
-          </div>
-
-          <div class="mb-3">
-            <input v-model="password" type="password" placeholder="Password" class="form-control" required />
-          </div>
-
-          <button type="submit" class="btn btn-primary w-100">Login</button>
-        
-        </form>
-
-        <p v-if="errorMessage" class="text-danger mt-3">{{ errorMessage }}</p>
       
+      <div class="col-md-5">
+        <div class="card shadow-sm rounded-4 p-4">
+          <h2 class="text-center mb-4 fw-bold">Loguéate</h2>
+
+          <div v-if="fromRegistration" class="alert alert-info text-center">
+            <strong>¡Bienvenido/a!</strong> Para finalizar tu registro, por favor inicia sesión.
+          </div>
+
+          <form @submit.prevent="handleLogin">
+            <div class="mb-3">
+              <input v-model="email" type="email" placeholder="Email" class="form-control" required />
+            </div>
+
+            <div class="mb-4">
+              <input v-model="password" type="password" placeholder="Contraseña" class="form-control" required />
+            </div>
+
+            <div class="d-flex justify-content-between">
+              <button type="button" class="btn btn-outline-secondary" @click="goBack">Volver</button>
+              <button type="submit" class="btn btn-primary">Login</button>
+            </div>
+
+            <p v-if="errorMessage" class="text-danger mt-3">{{ errorMessage }}</p>
+          </form>
+        </div>
       </div>
     </div>
   </div>
@@ -93,7 +102,7 @@ async function handleLogin() {
 .card{
   max-width: 400px;
   width: 100%;
-  height: 300%;
+  height: auto;
   margin-top: 5%;
   border-radius: 12px;
   transition: all 0.3s ease;
