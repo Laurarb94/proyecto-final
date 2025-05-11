@@ -155,14 +155,19 @@ final class MessageController extends AbstractController
             ];
         }, $messages);
         
-        // Si no hay mensajes, devolvemos un mensaje vacío
+        // Si no hay mensajes, devolver el usuario con mensajes vacíos. Así para que el front añada el nombre aunque no haya conversación
         if (empty($serialized)) {
-            return new JsonResponse(['status' => 'No hay mensajes en esta conversación']);
+            return new JsonResponse([
+                'user' => [
+                    'id' => $otherUser->getId(),
+                    'name' => $otherUser->getName()
+                ],
+                'message' => [],
+                'status' => 'No hay mensajes en esta conversación'
+            ]);
         }
         
         // Devolver los mensajes serializados
-       // return new JsonResponse($serialized);
-
        return new JsonResponse([
             'user' => [
             'id' => $otherUser->getId(),
