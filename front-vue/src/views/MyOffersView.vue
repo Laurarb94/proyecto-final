@@ -5,6 +5,7 @@ import UserCoursesComponent from '@/components/UserCoursesComponent.vue'
 import applicationService from '@/services/applicationService'
 import courseService from '@/services/courseService'
 import Swal from 'sweetalert2'
+import { off } from 'process'
 
 
 // Estado reactivo
@@ -44,11 +45,13 @@ async function removeApplication(offerId) {
   })
 
   if (result.isConfirmed) {
-    appliedOffers.value = appliedOffers.value.filter(o => o.id !== offerId)
-    localStorage.setItem('appliedOffers', JSON.stringify(appliedOffers.value))
-    if (currentOfferIndex.value >= appliedOffers.value.length) {
-      currentOfferIndex.value = Math.max(appliedOffers.value.length - 1, 0)
-    }
+    await applicationService.deleteApplication(userId.value, offerId)
+
+    const response = await applicationService.getUserApplications(userId.value)
+    console.log('Postulaciones después de eliminar: ', response.data)
+
+    appliedOffers.value = response.data || []
+    currentOfferIndex.value = appliedOffers.value.length > 0 ? 0 : -1
 
     Swal.fire(
       'Postulación cancelada!',
@@ -57,6 +60,7 @@ async function removeApplication(offerId) {
     )
   }
 }
+
 
 // Carga inicial
 onMounted(async () => {
@@ -91,14 +95,6 @@ onMounted(async () => {
        @prev-offer = "prevOffer"
        @next-offer = "nextOffer"
        @remove-application = "removeApplication"
-   />
-
-   <h2 class="title mt-5">Mis cursos</h2>
-   <UserCoursesComponent
-      :courses="enrrolledCourses"
-      :currentCourseIndex="currentCourseIndex"
-      @prev-course="prevCourse"
-      @next-course="nextCourse"
    />
 </div>
 

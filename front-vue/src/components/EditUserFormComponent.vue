@@ -150,4 +150,18 @@ const cancelEdit = () =>{
 .card-body{
     background-color: #f8f9fa;
 }
+
+form {
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+input.form-control,
+textarea.form-control {
+    border-radius: 12px;
+    font-size: 0.95rem;
+    padding: 10px 14px;
+}
+
 </style>

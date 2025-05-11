@@ -94,39 +94,59 @@ async function sendMessage(){
 .user-messages{
     flex: 1;
     padding: 20px;
-    border-left: 2px solid #ccc;
+    border-left: 2px solid #e0e0e0;
+    background-color: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.user-messages h3{
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
+  color: #333;
 }
 
 .message-area{
     max-height: 400px;
     overflow-y: auto;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
+    padding-right: 10px;
 }
 
 .message{
-    background-color: #f9f9f9;
-    padding: 10px;
-    margin-bottom: 5px;
+    background-color: linear-gradient(135deg, #f2f4f8, #e6e9f0);
+    color: #3c3f4a;
+    padding: 12px;
+    border-left: 4px solid #6c63ff;
     border-radius: 8px;
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
 .message-input{
     width: 100%;
-    height: 80px;
+    height: 90px;
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    resize: none;
     margin-bottom: 10px;
 }
 
 .send-button{
-    background-color: #4caf50;
+    background-color: #6c63ff;
     color: white;
-    padding: 10px;
+    padding: 10px 20px;
+    font-size: 1rem;
     border: none;
-    border-radius: 5px;
+    border-radius: 25px;
     cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
 .send-button:hover{
-    background-color: #45a049;
+    background-color: #574fd6;
 }
 
 </style>

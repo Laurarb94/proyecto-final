@@ -121,7 +121,9 @@ async function stopEditing() {
 .profile-card-wrapper{
     display: flex;
     justify-content: center;
-    margin-top: 30px;
+    align-items: center;
+    min-height: 80vh;
+    padding: 20px;
 }
 
 .profile-card {
@@ -129,8 +131,20 @@ async function stopEditing() {
     max-width: 600px;
     padding: 30px;
     border-radius: 20px;
-    background-color: #f9f9f9;
+    background-color: #ffffff;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+}
+
+.profile-card:hover{
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.card-title{
+    font-weight: bold;
+    font-size: 1.8rem;
+    color: #333;
+    margin-bottom: 1.5rem;
 }
 
 .profile-photo{
@@ -140,52 +154,72 @@ async function stopEditing() {
     object-fit: cover;
     margin: 0 auto 20px;
     display: block;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .card-body p{
-    margin-bottom: 15px;
-    font-size: 16px;
-    line-height: 1.5;
+    margin-bottom: 16px;
+    font-size: 1rem;
+    line-height: 1.6;
 }
 
-.card-title{
-    font-weight: bold;
-    font-size: 24px;
-    color: #333;
-}
 
-.btn-primary{
-    display: block;
+.editable input,
+.editable textarea {
     width: 100%;
-    margin-top: 20px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 0.95rem;
+    margin-top: 8px;
 }
 
-.biography-text{
+.biography-text {
     text-align: justify;
     margin-top: 10px;
-    font-size: 14px;
+    font-size: 0.95rem;
     color: #555;
+    white-space: pre-line;
 }
 
-.card-footer{
-    padding-top: 20px;
-    padding-bottom: 20px;
+.btn-primary.cv {
+    display: block;
+    width: 100%;
+    padding: 12px 0;
+    margin-top: 20px;
+    background-color: #6c63ff;
+    border: none;
+    color: white;
+    font-weight: 500;
+    border-radius: 25px;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary.cv:hover {
+    background-color: #574fd6;
+}
+
+.card-footer {
+    margin-top: 30px;
+    text-align: center;
 }
 
 .card-footer .btn-secondary {
     width: 100%;
     max-width: 200px;
-    margin: 0 auto;
     padding: 12px 0;
-    font-size: 16px;
+    font-size: 1rem;
     background-color: #6c757d;
     border: none;
     color: white;
     border-radius: 25px;
     cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
-.card-footer .btn-secondary:hover{
+.card-footer .btn-secondary:hover {
     background-color: #5a6268;
 }
 
