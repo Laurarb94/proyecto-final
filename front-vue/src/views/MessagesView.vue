@@ -32,10 +32,12 @@ function goBack(){
 <template>
     <div class="message-view-wrapper">
         <button @click="goBack" class="back-button">Volver</button>
+
+        <UserListComponent :users="listaUsuarios" @select-user="handleUserSelect" />
         
         <div class="message-page">
             <!--Lista de usuario-->
-            <UserListComponent :users="listaUsuarios" @select-user="handleUserSelect" />
+            
 
             <!--Mensajes del usuario seleccionado-->
             <UserMessagesComponent :user-id="selectedUserId" />
