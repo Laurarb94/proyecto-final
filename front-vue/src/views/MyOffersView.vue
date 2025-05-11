@@ -10,9 +10,7 @@ import { off } from 'process'
 
 // Estado reactivo
 const appliedOffers = ref([])
-const enrrolledCourses = ref([])
 const currentOfferIndex = ref(0)
-const currentCourseIndex = ref(0)
 const userId = ref(null)
 
 
@@ -25,13 +23,6 @@ function nextOffer() {
   if (currentOfferIndex.value < appliedOffers.value.length - 1) currentOfferIndex.value++
 }
 
-function prevCourse() {
-  if (currentCourseIndex.value > 0) currentCourseIndex.value--
-}
-
-function nextCourse() {
-  if (currentCourseIndex.value < enrrolledCourses.value.length - 1) currentCourseIndex.value++
-}
 
 async function removeApplication(offerId) {
   const result = await Swal.fire({
@@ -75,12 +66,6 @@ onMounted(async () => {
     console.error('Error al obtener las aplicaciones:', error)
   }
 
-  try {
-    const response = await courseService.getUserCourses(userId.value)
-    enrrolledCourses.value = response.data || []
-  } catch (error) {
-    console.error('Error al obtener los cursos:', error)
-  }
 })
 
 </script>

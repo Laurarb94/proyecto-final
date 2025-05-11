@@ -126,16 +126,15 @@ function goBack() {
 
     </div>
 
-
-    <div class="card-footer text-center mt-4">
-        <button @click="goBack" class="btn btn-secondary">Volver</button>
-    </div>
-
 </div>
 
 <!--Mensjae si no hay cursos-->
 <div v-else class="text-center py-4">
     <p class="text-muted">Todavía no estás inscrito en ningún curso</p>
+</div>
+
+<div class="card-footer text-center mt-4">
+    <button @click="goBack" class="btn btn-secondary">Volver</button>
 </div>
     
 
