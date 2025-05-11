@@ -110,6 +110,8 @@ const cancelEdit = () => {
         cv:''
     };
     step.value = 1; //volver al paso 1
+
+    router.push({ path: '/'})
 };
 
 //Función para manejar el cambio de archivos
@@ -143,8 +145,8 @@ const handleFileChange = (field, event) =>{
             </div>
 
             <div class="d-flex justify-content-between">
-              <button type="button" class="btn btn-secondary" @click="cancelEdit">Cancelar</button>
-              <button type="submit" class="btn btn-primary">Siguiente</button>
+              <button type="button" class="btn btn-outline-secondary" @click="cancelEdit">Cancelar</button>
+              <button type="submit" class="btn btn-outline-primary">Siguiente</button>
             </div>
         </form>
       </div>
@@ -191,8 +193,8 @@ const handleFileChange = (field, event) =>{
             </div>
 
             <div class="d-flex justify-content-between">
-              <button type="button" class="btn btn-secondary" @click="prevStep">Volver</button>
-              <button type="submit" class="btn btn-primary">Siguiente</button>
+              <button type="button" class="btn btn-outline-secondary" @click="prevStep">Volver</button>
+              <button type="submit" class="btn btn-outline-primary">Siguiente</button>
             </div>
           </form>
         </div>
@@ -214,8 +216,8 @@ const handleFileChange = (field, event) =>{
             </div>
 
             <div class="d-flex justify-content-between">
-              <button type="button" class="btn btn-secondary" @click="prevStep">Volver</button>
-              <button type="submit" class="btn btn-primary">Registrarse</button>
+              <button type="button" class="btn btn-outline-secondary" @click="prevStep">Volver</button>
+              <button type="submit" class="btn btn-outline-primary">Registrarse</button>
             </div>
           </form>
         </div>
@@ -245,14 +247,6 @@ const handleFileChange = (field, event) =>{
 .card-body {
   background-color: #fff;
   padding: 20px;
-}
-
-button {
-  width: 48%;
-}
-
-button:focus {
-  outline: none;
 }
 
 form {
