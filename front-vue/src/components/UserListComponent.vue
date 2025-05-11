@@ -77,9 +77,11 @@ function selectUser(user) {
   border: 1px solid #ccc;
 }
 
-.results-dropdown{
+.results-dropdown {
   position: absolute;
-  top: 105%;
+  top: 100%; /* más exacto que 105% */
+  left: 0;
+  margin-top: 4px; /* si quieres un poco de separación */
   width: 100%;
   background: #fff;
   border: 1px solid #ddd;
@@ -89,8 +91,8 @@ function selectUser(user) {
   overflow-y: auto;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   padding: 0;
-  margin-top: 6px;
 }
+
 
 .result-item{
   padding: 10px 16px;

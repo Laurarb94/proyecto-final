@@ -59,12 +59,20 @@ async function sendMessage(){
     }
 }
 
+function clearConversation(){
+  selectedUser.value = null
+  message.value = []
+  messageContent.value = ''
+}
+
 
 </script>
 
 <template>
    <div class="user-messages">
-    <h3>Conversación con: {{ selectedUser ? selectedUser.name : '' }}</h3>
+    <h3 v-if="selectedUser && selectedUser.name">
+        Conversación con: {{ selectedUser ? selectedUser.name : '' }}
+    </h3>
 
     <div v-if="selectedUser">
       <div class="message-area">
@@ -80,11 +88,15 @@ async function sendMessage(){
         placeholder="Escribe tu mensaje..."
         class="message-input"
       ></textarea>
-      <button @click="sendMessage" class="send-button">Enviar</button>
+      <div class="actions-row">
+        <button @click="clearConversation" class="clear-button">Cerrar conversación</button>
+        <button @click="sendMessage" class="send-button">Enviar</button>
+      </div>
+      
     </div>
 
-    <div v-else>
-      <p>Selecciona un usuario para comenzar la conversación</p>
+    <div v-else class="no-user-placeholder">
+      <img src="../assets/images/chat.png" alt="foto chat" class="chat-placeholder">
     </div>
   </div>
 </template>
@@ -94,7 +106,6 @@ async function sendMessage(){
 .user-messages{
     flex: 1;
     padding: 20px;
-    border-left: 2px solid #e0e0e0;
     background-color: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
@@ -148,6 +159,56 @@ async function sendMessage(){
 .send-button:hover{
     background-color: #574fd6;
 }
+
+.clear-button {
+    background-color: #f0f0f0;
+    color: #444;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.clear-button {
+  background-color: #e0e0e0;
+  color: #222;
+}
+
+.no-user-placeholder{
+  display: flex;
+  justify-content: center;
+  padding-top: 2rem;
+}
+
+.chat-placeholder{
+  max-width: 450px;
+  width: 100%;
+}
+
+.actions-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.clear-button.bottom-button {
+  font-size: 0.95rem;
+  color: #666;
+  border: 1px solid #ccc;
+  border-radius: 25px;
+  padding: 8px 16px;
+  background-color: #f9f9f9;
+  transition: background-color 0.2s ease;
+}
+
+.clear-button.bottom-button:hover {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+
 
 </style>
   
