@@ -45,10 +45,24 @@ const isAdmin = computed(() => role.value === 'ROLE_ADMIN')
 
 // Ciclo de vida
 onMounted(async () => {
+  if(!role.value){
+    const storedRole = localStorage.getItem('userRole')
+    if(storedRole){
+      role.value = storedRole
+    }
+  }
+
   await fetchUserData()
   await fetchCategories()
   await fetchOffers()
+
 })
+/*
+onMounted(async () => {
+  await fetchUserData()
+  await fetchCategories()
+  await fetchOffers()
+})*/
 
 // Métodos
 async function fetchUserData() {
@@ -384,7 +398,7 @@ function goToAdminPanel(){
 }
 
 .user-menu button:hover {
-  background-color: #007bff;
+  background-color: #6c63ff;;
   color: white;
 }
 

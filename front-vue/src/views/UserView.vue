@@ -6,6 +6,6 @@ import UserComponent from '@/components/UserComponent.vue';
         <h1>Usuarios de la aplicación: </h1>
 
         <UserComponent />
-        <RouterLink to="/" button class="btn-btn-primary mt-3">Volver al inicio</RouterLink>
+        <RouterLink to="/dashboardUser" button class="btn btn-primary mt-3">Página principal</RouterLink>
     </div>
 </template>
